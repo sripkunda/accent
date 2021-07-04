@@ -200,7 +200,7 @@ class AccentNodeList extends Array {
     }
 
     set(attr, val, concat, callback) {
-        this.forEach((e) => {
+        super.forEach.call(this, (e) => {
             callback = callback || ((e, v) => {
                 e[attr][v] = val[v];
             });
