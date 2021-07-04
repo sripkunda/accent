@@ -1,0 +1,11 @@
+<div router-target>
+    <div>
+        <input type="text" ac-model="text" />
+        <a ac-click="this.tasks.push(this.text);">Add</a>
+        <ul ac-for="task in tasks">
+            <li>{{ task }}</li>
+        </ul>
+    </div>
+    <br>
+    <a to="about" href="#">About</a>
+</div>

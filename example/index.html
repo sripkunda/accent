@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Accent Routing App</title>
+    <link href="css/index.css" rel="stylesheet"/>
+</head>
+
+<body ac-context='{ tasks: [], text: "1" }'>
+    <h1 ac-bind="text"></h1>
+    <div ac-router-pane></div>
+    <script src="../src/router.accent.js"></script>
+    <script src="../src/core.accent.js"></script>
+    <!-- <script src="./js/index.js"></script> -->
+    <script>
+        new $router("./js/routing.json");
+    </script>
+</body>
+
+</html>

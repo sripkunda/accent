@@ -1,0 +1,27 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@200&display=swap');
+
+body {
+    background-color: #23272A; 
+    color: white; 
+    font-family: 'Inter', sans-serif;
+    padding: 100px;
+}
+
+a {
+    padding: 10px; 
+    background-color: #5865F2;
+    text-decoration: none; 
+    color: white;
+}
+
+a:hover {
+    cursor: pointer;
+}
+
+input {
+    color: white; 
+    font-family: 'Inter', sans-serif;
+    padding: 13px;
+    background-color: #2C2F33;
+    border: none; 
+}
