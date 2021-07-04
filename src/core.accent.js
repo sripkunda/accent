@@ -58,17 +58,21 @@ class AccentElement {
         let template = loop.template // the stored template for the loop
         iterator = iterator || loop.iterator, iterable = iterable || loop.iterable; // get the loop data
         this.element.innerHTML = "";
-        if (!iterator) return;
+        if (!iterator || !Array.isArray(iterator)) return;
         iterator.forEach((prop, i) => {
             let out = template; // create a variable for the HTML output of the element
             let temp; // variable that stores the regex matches 
             const regex = /{{(.*?)}}/g; // the regex that gets the {{ values }}
             // loop through matches of the regex
             while ((temp = regex.exec(template)) !== null) {
-                temp[1] = temp[1].replaceAll("this.", "").trim();
-                let value = AccentCore._compile(temp[1], JSON.parse(`{ "${iterable}": ${typeof prop == 'string' ? `"${prop}"` : prop}, "index": ${i} }`), true); // get the value of the variable 
-                let matchIndex = template == out ? temp.index : temp.index + (out.length - template.length); // get the index of the match
-                out = out.substr(0, matchIndex) + value + out.substr(matchIndex + temp[0].length, out.length); // replace the {{value}} with the real value without disrupting the rest of the items
+                try {
+                    temp[1] = temp[1].replaceAll("this.", "").trim();
+                    let value = AccentCore._compile(temp[1], JSON.parse(`{ "${iterable}": ${typeof prop == 'string' ? `"${prop}"` : prop}, "index": ${i} }`), true); // get the value of the variable 
+                    let matchIndex = template == out ? temp.index : temp.index + (out.length - template.length); // get the index of the match
+                    out = out.substr(0, matchIndex) + value + out.substr(matchIndex + temp[0].length, out.length); // replace the {{value}} with the real value without disrupting the rest of the items
+                } catch {
+                    throw Error(`accent.js: An error occurred while executing the for loop.`)
+                }
             }
             this.element.innerHTML += out; // add to the innerHTML
         });
@@ -174,7 +178,7 @@ class AccentObservable {
     }
 
     set(prop, value) {
-        value ? this.value[prop] = value : this.value = prop; // set the value of the AccentObservable
+        typeof value !== 'undefined' ? this.value[prop] = value : this.value = prop; // set the value of the AccentObservable
         // apply property change to all bindings 
         this.bindings.forEach((b) => {
             if (b.el)
@@ -200,14 +204,19 @@ class AccentObservable {
     static proxify(object) {
         let target = object.value;
         if (typeof target !== 'object')
-            target = { AccentObservableValue: target };
+            target = {
+                ObservableValue: target,
+                AccentObservableObject: true
+            };
         const handler = {
             get: (obj, prop) => {
                 return prop in obj ? obj[prop] : obj.value;
             },
             set: (target, prop, value) => {
-                if (value && prop)
-                    prop ? object.set(prop, value) : object.set(value);
+                if (typeof value !== 'undefined' && typeof prop !== 'undefined')
+                    if (target.AccentObservableObject && prop == 'ObservableValue')
+                        object.set(value);
+                    else prop ? object.set(prop, value) : object.set(value);
                 return true;
             }
         }
@@ -283,7 +292,7 @@ const AccentDirectives = {
             obj.element.innerHTML = obj.data.loop.value.template;
             AccentDirectives.for(element, val);
         }); // bind the loop data so that changes in the object also refect in the for directive DOM element
-        // console.log(accentObject.bindings);
+
         loop.for(); // initiate the for loop
     },
     // two-way binding of an element
@@ -326,9 +335,9 @@ const AccentDirectives = {
         if (AccentDirectives.ignore(el)) return;
         const accentEl = AccentElement.elements.get(el) ?? new AccentElement(el, {
             handler: (event) => {
-                try {
+                // try {
                     AccentCore._compile(val, AccentContext.contexts.get(AccentDOMController.findLocalContext(el)).objects, false, true);
-                } catch { throw Error(`accent.js: An error occurred while executing ${AccentCore.DIRECTIVE_PREFIX}on. The local context could not be found.`) }
+                // } catch { throw Error(`accent.js: An error occurred while executing ${AccentCore.DIRECTIVE_PREFIX}on. The local context could not be found.`) }
             }
         });
         el.removeEventListener(ev, accentEl.data?.handler);
@@ -363,13 +372,13 @@ const AccentCore = {
         });
     },
     _compile: (arg, params, bReturn, bRaw, el) => {
-        try {
+        // try {
             let args = {}; // instantiate an empty object for the arguments 
             Object.keys(params).forEach((p) => {
                 let par = params[p]; // reference the current element of params
                 if (par instanceof AccentObservable) {
                     // if the current element is an AccentObservable, then set args[p] to the value of that AccentObservable and bind the object to the current element
-                    args[p] = par.proxy["AccentObservableValue"] ?? par.proxy;
+                    args[p] = par.proxy;
                     if (el) {
                         par.bind(el, null, null, (elem) => {
                             const cg = AccentDOMController.findLocalContext(elem);
@@ -388,9 +397,9 @@ const AccentCore = {
             return AccentObservable.objects[arg]  // return the requested AccentObservable if applicable
                 ?? AccentElement.elements.get(arg) // return the requested AccentElement if applicable
                 ?? (bRaw
-                        ? Function('params', `${bReturn ? "return " : ""}${exp};`)(args) // execute raw if specified
-                        : Function('params', `${bReturn ? "return " : ""}typeof ${exp} !== 'undefined' ? ${exp} : params['${exp}'];`)(args)); // otherwise execute with awareness 
-        } catch {}
+                    ? Function('params', `${bReturn ? "return " : ""}${exp};`)(args) // execute raw if specified
+                    : Function('params', `${bReturn ? "return " : ""}typeof ${exp} !== 'undefined' ? ${exp} : params['${exp}'];`)(args)); // otherwise execute with awareness 
+        // } catch { }
     }
 }
 

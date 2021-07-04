@@ -55,7 +55,7 @@ class AccentUtilObject extends Object {
     lastKeyOf(key, val) { this.keyOf(key, val, true); }
 
     filter(callback, first) {
-        var res = {};
+        let res = {};
         Object.keys(this).every((key) => {
             if (first) {
                 res = this[key];
@@ -122,16 +122,16 @@ class AccentNodeList extends Array {
         const keys = Object.keys(obj);
         if (keys.length > 0) {
             if (keys.length > 1) {
-                return AccentNodeCollection.from(keys.map(e => new AccentNodeList(obj[e] ? (obj[e][0] ? obj[e][0] : obj[e]) : [])));
+                return AccentNodeCollection.from(
+                    keys.map(e => new AccentNodeList(obj[e] ? (obj[e][0] ? obj[e][0] : obj[e]) : []))
+                );
+            } else if (obj[0] && obj[0][0]) {
+                if (obj[0][0].length > 1)
+                    return AccentNodeList(obj[0][0]);
+                else
+                    return AccentNodeList(obj[0][0][0]);
             } else {
-                if (obj[0] && obj[0][0]) {
-                    if (obj[0][0].length > 1)
-                        return AccentNodeList(obj[0][0]);
-                    else
-                        return AccentNodeList(obj[0][0][0]);
-                } else {
-                    return new AccentNodeList(obj[0] ?? []);
-                }
+                return new AccentNodeList(obj[0] ?? []);
             }
 
         } else
@@ -169,7 +169,7 @@ class AccentNodeList extends Array {
     }
 
     get(attr, val) {
-        var vals = Array.from(this).map(e => e[attr]);
+        const vals = Array.from(this).map(e => e[attr]);
         if (!val) return vals.length > 1 ? vals : vals[0];
     }
 
@@ -190,7 +190,7 @@ class AccentNodeList extends Array {
 
     attr(attr, val) {
         if (!val) {
-            var arr = Array.from(this).map(e => e.getAttribute(attr));
+            const arr = Array.from(this).map(e => e.getAttribute(attr));
             return arr.length > 1 ? arr : arr[0];
         } else {
             this.forEach(e => {
@@ -201,9 +201,9 @@ class AccentNodeList extends Array {
 
     set(attr, val, concat, callback) {
         this.forEach((e) => {
-            callback = callback || function (e, v) {
+            callback = callback || ((e, v) => {
                 e[attr][v] = val[v];
-            };
+            });
             if (typeof val === "object") {
                 Object.keys(val).forEach(v => {
                     this.forEach((e) => { callback(e, v) });
@@ -305,8 +305,8 @@ const Ac = {
 };
 
 // DOM 
-var $el = AccentUtil._get;
-var $ready = (e) => AccentUtil._onReady(document, e);
+const $el = AccentUtil._get;
+const $ready = (e) => AccentUtil._onReady(document, e);
 
 // Objects
 const $obj = AccentUtilObject;
