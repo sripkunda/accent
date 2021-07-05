@@ -11,17 +11,17 @@ class AccentDOMController {
                     if (node.attributes) {
                         const bTranspile = (node) => {
                             const attrs = node.getAttributeNames();
-                            const attrArray = Object.keys(AccentDirectives).map(e => AccentCore.DIRECTIVE_PREFIX + e).concat(attrs);
+                            const attrArray = Object.keys(AccentDirectives).map(e => AccentScopes.DIRECTIVE_PREFIX + e).concat(attrs);
                             if (attrArray.some((val, i) => attrArray.indexOf(val) !== i)) {
-                                AccentCore._transpile(node.parentElement ?? node); // if so call transpile() on the parentElement (or the element itself, assuming that there is no parent element).
+                                AccentScopes._transpile(node.parentElement ?? node); // if so call transpile() on the parentElement (or the element itself, assuming that there is no parent element).
                             }
                         }
                         bTranspile(node);
                     }
                 });
             } else if (mutation.type == "attributes") {
-                if (Object.keys(mutation.attributeName).map(e => AccentCore.DIRECTIVE_PREFIX + e).includes(mutation.attributeName));  // check if the attribute is a directive 
-                AccentCore._transpile(mutation.target.parentElement ?? mutation.target); // if so then transpile() 
+                if (Object.keys(mutation.attributeName).map(e => AccentScopes.DIRECTIVE_PREFIX + e).includes(mutation.attributeName));  // check if the attribute is a directive 
+                AccentScopes._transpile(mutation.target.parentElement ?? mutation.target); // if so then transpile() 
             }
         });
     }
@@ -34,7 +34,7 @@ class AccentDOMController {
 
     static findLocalContext(el) {
         while (el)
-            if (el.getAttributeNames().includes(`${AccentCore.DIRECTIVE_PREFIX}context`) || AccentContext.contexts.get(el))
+            if (el.getAttributeNames().includes(`${AccentScopes.DIRECTIVE_PREFIX}context`) || AccentContext.contexts.get(el))
                 return el;
             else
                 el = el.parentElement;
@@ -67,7 +67,7 @@ class AccentElement {
             while ((temp = regex.exec(template)) !== null) {
                 try {
                     temp[1] = temp[1].replaceAll("this.", "").trim();
-                    let value = AccentCore._compile(temp[1], JSON.parse(`{ "${iterable}": ${typeof prop == 'string' ? `"${prop}"` : prop}, "index": ${i} }`), true); // get the value of the variable 
+                    let value = AccentScopes._compile(temp[1], JSON.parse(`{ "${iterable}": ${typeof prop == 'string' ? `"${prop}"` : prop}, "index": ${i} }`), true); // get the value of the variable 
                     let matchIndex = template == out ? temp.index : temp.index + (out.length - template.length); // get the index of the match
                     out = out.substr(0, matchIndex) + value + out.substr(matchIndex + temp[0].length, out.length); // replace the {{value}} with the real value without disrupting the rest of the items
                 } catch {
@@ -244,7 +244,7 @@ class AccentObservable {
 const AccentDirectives = {
     // find and ignore elements with ignore directive
     ignore: (el) => {
-        const attr = `${AccentCore.DIRECTIVE_PREFIX}ignore`;
+        const attr = `${AccentScopes.DIRECTIVE_PREFIX}ignore`;
         if (el?.hasAttribute(attr)) {
             if (el.getAttribute(attr) == "recursive") {
                 while (el) {
@@ -276,7 +276,7 @@ const AccentDirectives = {
         const args = val.split(" in ");
         const elem = AccentContext.contexts.get(cg); // get the args and define the element 
         if (!elem) throw Error(
-            `accent.js: Local context could not be found for ${AccentCore.DIRECTIVE_PREFIX}for. ${AccentCore.DIRECTIVE_PREFIX}for elements must be localized to a context.`
+            `accent.js: Local context could not be found for ${AccentScopes.DIRECTIVE_PREFIX}for. ${AccentScopes.DIRECTIVE_PREFIX}for elements must be localized to a context.`
         );
         const iterator = elem.data[args[1]]; // if element exists, then get the context value from it, otherwise get it by compiling.
         const loop = AccentElement.elements.get(el) ? AccentElement.elements.get(el) : new AccentElement(el, {
@@ -311,7 +311,7 @@ const AccentDirectives = {
         const cg = AccentDOMController.findLocalContext(el);
         const context = AccentContext.contexts.get(cg);
         const params = context ? (context.objects || {}) : {};
-        const cont = AccentCore._compile(val, params, true, true, el);
+        const cont = AccentScopes._compile(val, params, true, true, el);
         el[prop] = cont ?? "";
     },
     // set textContent with an expression
@@ -335,9 +335,9 @@ const AccentDirectives = {
         if (AccentDirectives.ignore(el)) return;
         const accentEl = AccentElement.elements.get(el) ?? new AccentElement(el, {
             handler: (event) => {
-                // try {
-                    AccentCore._compile(val, AccentContext.contexts.get(AccentDOMController.findLocalContext(el)).objects, false, true);
-                // } catch { throw Error(`accent.js: An error occurred while executing ${AccentCore.DIRECTIVE_PREFIX}on. The local context could not be found.`) }
+                try {
+                    AccentScopes._compile(val, AccentContext.contexts.get(AccentDOMController.findLocalContext(el)).objects, false, true);
+                } catch { throw Error(`accent.js: An error occurred while executing ${AccentCore.DIRECTIVE_PREFIX}on. The local context could not be found.`) }
             }
         });
         el.removeEventListener(ev, accentEl.data?.handler);
@@ -350,7 +350,7 @@ const AccentDirectives = {
 };
 
 // public accent object
-const AccentCore = {
+const AccentScopes = {
     DIRECTIVE_PREFIX: "ac-",
     _el: (sel, forceArr) => {
         const obj = document.querySelectorAll(sel);
@@ -359,12 +359,12 @@ const AccentCore = {
     _render: () => {
         // configure mutation observer on body 
         new AccentDOMController({ attributes: true, childList: true, subtree: true });
-        AccentCore._transpile(document);
+        AccentScopes._transpile(document);
     },
     _transpile: (el) => {
         // configure directives
         Object.keys(AccentDirectives).forEach((di, i) => {
-            const selector = `${AccentCore.DIRECTIVE_PREFIX}${di}`;
+            const selector = `${AccentScopes.DIRECTIVE_PREFIX}${di}`;
             const nodes = el.querySelectorAll(`[${selector}]`);
             nodes.forEach(node => {
                 AccentDirectives[di](node, node.getAttribute(selector));
@@ -372,7 +372,7 @@ const AccentCore = {
         });
     },
     _compile: (arg, params, bReturn, bRaw, el) => {
-        // try {
+        try {
             let args = {}; // instantiate an empty object for the arguments 
             Object.keys(params).forEach((p) => {
                 let par = params[p]; // reference the current element of params
@@ -386,7 +386,7 @@ const AccentCore = {
                             if (context?.callback) {
                                 context.callback(context);
                             }
-                            AccentCore._transpile(elem.parentElement ?? elem);
+                            AccentScopes._transpile(elem.parentElement ?? elem);
                         });
                     }
                 } else {
@@ -399,16 +399,16 @@ const AccentCore = {
                 ?? (bRaw
                     ? Function('params', `${bReturn ? "return " : ""}${exp};`)(args) // execute raw if specified
                     : Function('params', `${bReturn ? "return " : ""}typeof ${exp} !== 'undefined' ? ${exp} : params['${exp}'];`)(args)); // otherwise execute with awareness 
-        // } catch { }
+        } catch {}
     }
 }
 
 // HTML DOM
 if (typeof $el === 'undefined') {
-    var $el = AccentCore._el;
+    var $el = AccentScopes._el;
 }
 
-const $els = (sel) => { return AccentCore._el(sel, true); };
+const $els = (sel) => { return AccentScopes._el(sel, true); };
 
 // Directives
 const $for = AccentDirectives.for;
@@ -425,6 +425,6 @@ const $get = (obj, prop) => { obj.get(prop); }
 // Accent DOM
 const $context = AccentContext.from;
 const $element = AccentElement.from;
-const $render = AccentCore._transpile;
+const $render = AccentScopes._transpile;
 
-AccentCore._render(); // render page
+AccentScopes._render(); // render page

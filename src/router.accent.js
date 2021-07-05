@@ -1,7 +1,7 @@
 class AccentRouter {
     routes;
     currentRoute;
-    animations; 
+    animation; 
     defaultPane; 
 
     constructor(routes, pane) {
@@ -42,6 +42,7 @@ class AccentRouter {
 
     async fillPane(destination, name, root) {
         const pane = document.querySelector(`[${DirectivePrefix}router-pane${name ? `=${name}` : ``}]`) || document.documentElement; // get the pane to insert elements onto
+        this.animation = pane.getAttribute(`${DirectivePrefix}router-animate`); 
         const route = (await this.fetchPage(destination ?? this.routes)); // get the page data for the destination 
         const doc = route.html; // the document that is to be added
         const path = Array.isArray(this.routes[route.name]["path"]) 
@@ -54,12 +55,12 @@ class AccentRouter {
         pane.innerHTML = ""; // clear the existing page content of the pane
         const toAppend = pane == document.documentElement ? doc.documentElement : doc.querySelector("[router-target]"); 
         if (!toAppend) throw Error(`accent.js: 'router-target' is not found in page '${destination}.' If the routing pane is explicitly defined, a router-target must be set for all routed pages.`); // add the new content onto the pane
-        pane.append(toAppend);
+        this.animation ? this.animate(pane.append(toAppend)) : pane.append(toAppend);
         this.currentRoute = route.id; // change the current route
         this._executeScripts(pane); // execute javascript on the page 
         this._configureRoutingLinks(); // execute javascript on the page 
         // if there is an accent core attached, transpile the page again to account for the changes 
-        if (typeof AccentCore !== 'undefined') AccentCore._transpile(pane);
+        if (typeof AccentScopes !== 'undefined') AccentScopes._transpile(pane);
     }
 
     beginNavigation() {
@@ -69,7 +70,6 @@ class AccentRouter {
     }
 
     animate() {
-        
     }
 
     _executeScripts(doc) {
@@ -144,4 +144,4 @@ class AccentRouter {
 }
 
 const $router = AccentRouter;
-const DirectivePrefix = typeof AccentCore === 'undefined' ? 'ac-' : AccentCore.DIRECTIVE_PREFIX;
+const DirectivePrefix = typeof AccentScopes === 'undefined' ? 'ac-' : AccentScopes.DIRECTIVE_PREFIX;
