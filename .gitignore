@@ -1,4 +1,6 @@
 # internals/dev
-example/
-node_modules/
-logs/
+!/src/
+!/packages/
+!*.md
+/*
+/*/
