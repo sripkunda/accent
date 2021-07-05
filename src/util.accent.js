@@ -52,17 +52,18 @@ class AccentUtilObject extends Object {
         return i;
     }
 
-    lastKeyOf(key, val) { this.keyOf(key, val, true); }
+    lastKeyOf(key, val) { return this.keyOf(key, val, true); }
 
     filter(callback, first) {
         let res = {};
         Object.keys(this).every((key) => {
-            if (first) {
-                res = this[key];
-                return false;
-            }
-            if (callback(this[key]))
+            if (callback(this[key])) {
+                if (first) {
+                    res = this[key];
+                    return false;
+                }
                 res[key] = this[key];
+            }
             return true;
         });
         return res;
@@ -70,6 +71,7 @@ class AccentUtilObject extends Object {
 
     find(callback) { return this.filter(callback, true); }
 }
+
 // An AccentNodeList that stores HTML elements for use
 class AccentNodeList extends Array {
 
@@ -80,7 +82,7 @@ class AccentNodeList extends Array {
         });
     }
 
-    /* element maping to plain es6 */
+    /* element mapping to plain es6 */
 
     children() {
         return this.getDOM("children");
@@ -147,7 +149,7 @@ class AccentNodeList extends Array {
 
     prepend(val) {
         if (!val) return AccentUtil._err("accent.js: $el(...).prepend() was used without any parameters");
-        this.forEach(e => {
+        super.forEach.call(this, e => {
             e.insertAdjacentHTML("afterbegin", val);
         });
     }
@@ -193,7 +195,7 @@ class AccentNodeList extends Array {
             const arr = Array.from(this).map(e => e.getAttribute(attr));
             return arr.length > 1 ? arr : arr[0];
         } else {
-            this.forEach(e => {
+            super.forEach.call(this, e => {
                 e.setAttribute(attr, val);
             });
         }
@@ -206,7 +208,7 @@ class AccentNodeList extends Array {
             });
             if (typeof val === "object") {
                 Object.keys(val).forEach(v => {
-                    this.forEach((e) => { callback(e, v) });
+                    super.forEach.call(this, (e) => { callback(e, v); });
                 });
             } else e[attr] = concat ? e[attr] + val : val;
         });
@@ -215,7 +217,7 @@ class AccentNodeList extends Array {
     /* events */
 
     on(ev, callback) {
-        this.forEach((e) => {
+        super.forEach.call(this, (e) => {
             e.addEventListener(ev, callback);
         });
     }
