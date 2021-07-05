@@ -1,2 +1,4 @@
 # internals/dev
-example
+example/
+node_modules/
+logs/
