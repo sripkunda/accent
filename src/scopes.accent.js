@@ -143,12 +143,12 @@ class AccentObservable {
     }
 
     bind(element, property, event, callback) {
-        /* bind value */
         // prevent duplicate bindings
         const bindingIndex = this.bindings.findIndex(b => b.el == element);
         if (bindingIndex > -1) {
             this.removeBind(this.bindings[bindingIndex].el);
         }
+
         const bind = {
             el: element,
             prop: property,
@@ -168,7 +168,6 @@ class AccentObservable {
         this.bindings.push(bind);
         listener();
 
-        /* clean up */
         // clean up bindings that no longer have live references
         this.bindings.filter(b => !document.documentElement.contains(b.el)).forEach(b => {
             this.removeBind(b.el);
@@ -335,6 +334,7 @@ const AccentDirectives = {
         if (AccentDirectives.ignore(el)) return;
         const accentEl = AccentElement.elements.get(el) ?? new AccentElement(el, {
             handler: (event) => {
+                event.preventDefault();
                 try {
                     AccentScopes._compile(val, AccentContext.contexts.get(AccentDOMController.findLocalContext(el)).objects, false, true);
                 } catch { throw Error(`accent.js: An error occurred while executing ${AccentCore.DIRECTIVE_PREFIX}on. The local context could not be found.`) }
@@ -346,6 +346,10 @@ const AccentDirectives = {
     // accent click event
     click: (el, val) => {
         AccentDirectives.on(el, val, "click");
+    },
+    // accent submit event
+    submit: (el, val) => {
+        AccentDirectives.on(el, val, "submit");
     }
 };
 
@@ -414,11 +418,13 @@ const $els = (sel) => { return AccentScopes._el(sel, true); };
 const $for = AccentDirectives.for;
 const $event = AccentDirectives.on;
 const $attr = AccentDirectives.set;
-const $bind = AccentDirectives.bind;
+const $subscribe = (el, obj, callback) => {
+    obj.bind(el, null, null, callback); 
+};
 const $model = AccentDirectives.model;
 
 // Accent Objects 
-const $object = (name) => { return AccentObservable.objects[name].value; };
+const $object = (name, ctx) => { return ctx ? ctx.objects[name] : AccentObservable.objects[name]; };
 const $set = (obj, prop, value) => { obj.set(prop, value); }
 const $get = (obj, prop) => { obj.get(prop); }
 
