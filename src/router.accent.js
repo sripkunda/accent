@@ -21,21 +21,26 @@ class AccentRouter {
             return routes;
         });
         this.defaultPane = pane;
-        AccentRouter.route(this, location.pathname, true, pane);
+        await AccentRouter.route(this, location.pathname, true, pane);
         this.#beginNavigation();
+        
+        if (!(async == false)) this.#cachePagesAsync().then((v) => {
+            document.dispatchEvent(v);
+        });
     }
 
     async fillPane(destination, root, dynamics, pane) {
         // get routing information
         pane = pane || document.querySelector(`[${AccentRouterConfig.ROUTER_PANE_DIRECTIVE}`) || document.documentElement; // get the pane to insert elements onto
-        const route = this.#routerCache[destination] ?? (await this.#fetchPage(destination ?? this.routes)); // get the page data for the destination
+        const cache = this.#routerCache ? this.#routerCache[destination] : undefined; 
+        const route = cache?.html ? cache : (await this.#fetchPage(destination ?? this.routes)); // get the page data for the destination
         const doc = new DOMParser().parseFromString(route.html, 'text/html'); // the document that is to be added
 
         let path = (Array.isArray(this.routes[route.name]['path']) ?
             this.routes[route.name]['path'][0] :
             this.routes[route.name]['path']);
 
-        path = path.replace(AccentRouterConfig.ROUTER_DYNAMIC_LINK, (a, b) => {
+        path = path.replace(AccentRouterConfig.ROUTER_DYNAMIC_LINK, (_a, b) => {
             return `${dynamics ? (dynamics[b] ? `${dynamics[b]}/` : '') : ''}`;
         });
 
@@ -65,7 +70,6 @@ class AccentRouter {
         }
 
         pane.append(toAppend);
-
         // execute javascript, load css, configure routes
         doc.querySelectorAll('link[rel=stylesheet], style').forEach((s) => pane.append(s));
         this.currentRoute = route.id; // change the current route
@@ -75,17 +79,34 @@ class AccentRouter {
 
         // if there is an accent core attached, transpile the page again to account for the changes
         if (typeof AccentMarkup !== 'undefined') AccentMarkup._transpile(pane);
+        return;
     }
 
+    async #cachePagesAsync() {
+        return await new Promise((res, rej) => {
+            const routes = Object.keys(this.routes);
+           routes.forEach(async (r, i) => {
+                this.#routerCache[r] = { 
+                    name: r, 
+                    html: await this.#fetchPageAsync(r)
+                };
+                if (routes.length == i + 1) res(AccentRouterEvents.ROUTES_LOADED_ASYNC)
+            });
+        }).then(v => {
+            return v; 
+        });
+    }
+
+    async #fetchPageAsync(page) {
+        try {
+            const path = this.#formatPath(`${this.routes[page]['src']}`);
+            return await AccentRouter.#fetch(path, 'html');
+        } catch {
+            throw Error(`Accent.js: router could not load source for ${page} (src: ${this.routes[page]['src']})`);
+        }
+    };
+
     async #fetchPage(routes) {
-        const fetchPage = async (page) => {
-            try {
-                const path = this.#formatPath(`${this.routes[page]['src']}`);
-                return await AccentRouter.#fetch(path, 'html');
-            } catch {
-                throw Error(`Accent.js: router could not load source for ${page} (src: ${this.routes[page]['src']})`);
-            }
-        };
         return await new Promise((res, rej) => {
             if (typeof routes === 'object') {
                 Object.keys(routes).forEach(async (route, i) => {
@@ -98,18 +119,18 @@ class AccentRouter {
             }
         }).then(async (data) => {
             if (!data) data = Object.keys(this.routes)[0];
-            this.#routerCache[data] = { name: data, html: await fetchPage(data) };
+            this.#routerCache[data] = { name: data, html: await this.#fetchPageAsync(data) };
             return this.#routerCache[data];
         });;
     }
 
-    #beginNavigation() {
+    async #beginNavigation() {
         window.addEventListener('popstate', (event) => {
             AccentRouter.route(this, window.location.pathname, true);
         });
     }
 
-    #executeScripts(doc, name) {
+    async #executeScripts(doc, name) {
         doc.querySelectorAll('script').forEach(async (el) => {
             const src = el.getAttribute('src');
             const path = src ? this.#formatPath(src) : undefined;
@@ -162,10 +183,10 @@ class AccentRouter {
             });
     }
 
-    static route(router, destination, root, pane) {
+    static async route(router, destination, root, pane) {
         document.dispatchEvent(AccentRouterEvents.ROUTING_STARTED);
         const route = AccentRouter._getRouteFromInput(router, destination);
-        router.fillPane(route.destination, root, route.dynamics, pane).then(v => {
+        await router.fillPane(route.destination, root, route.dynamics, pane).then(v => {
             document.dispatchEvent(AccentRouterEvents.ROUTING_ENDED);
         });
     }
@@ -217,6 +238,7 @@ const AccentRouterEvents = {
     ROUTES_RECOGNIZED: new Event('router:routes-recognized'),
     ROUTING_STARTED: new Event('router:routing-started'),
     ROUTING_ENDED: new Event('router:routing-ended'),
+    ROUTES_LOADED_ASYNC: new Event('router:routes-loaded-async'),
     ROUTING_FAILED: new Event('router:routing-failed')
 }
 
