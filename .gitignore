@@ -1,6 +1,14 @@
 # internals/dev
-!/src/
-!/packages/
-!*.md
-/*
-/*/
+node_modules/
+
+# testing
+*.html
+*.css
+*.js
+/*.json
+
+# exceptions
+!src/*.js
+!package-lock.json
+!package.json
+!.eslintrc.js
