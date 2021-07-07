@@ -5,7 +5,7 @@ node_modules/
 *.html
 *.css
 *.js
-/*.json
+*.json
 
 # exceptions
 !src/*.js

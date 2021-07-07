@@ -11,5 +11,13 @@ module.exports = {
   },
   "parser": "babel-eslint",
   'rules': {
+    "capitalized-comments": [
+      "error",
+      "always",
+      {
+        "ignorePattern": "pragma|ignored",
+        "ignoreInlineComments": false
+      }
+    ]
   },
 };
