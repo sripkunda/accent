@@ -200,7 +200,7 @@ class AccentRouter {
     }
     
     /**
-     * Adds onclick events to links identified as routerLinks. 
+     * Adds onclick events to links identified as routerLinks 
      */
     #configureRoutingLinks() {
         // Loop through the router links using the router link directive
@@ -218,7 +218,7 @@ class AccentRouter {
 
     /**
      * Returns a formatted path from the lowest path of the webpage to normalize paths. 
-     * @param  {string} path - The path that needs to be formatted
+     * @param  {string} path - The path that needs to be formatted.
      */
     #formatPath(path) {
         return `//${window.location.host.replace(/\/$/, '')}/${path}`;
@@ -230,18 +230,21 @@ class AccentRouter {
      * @param  {string} type - The response type (JSON or HTML)
      */
     static async #fetch(path, type) {
+        // Fetch from the path and return the appropriate type
         return await fetch(path)
             .then(async (response) => {
                 if (!response.ok) {
+                    // Return an error if a certain page could not loaded
                     throw new Error(`HTTP error ${response.status}`);
                 }
+                // Return the data for the appropriate data type
                 switch (type.toLowerCase()) {
                     case 'json':
-                        return response.json();
+                        return response.json(); // Return the JSON
                     case 'html':
                         const html = await response.text();
                         // Convert the HTML string into a document object
-                        return html;
+                        return html; // Return the HTML 
                 }
             })
             .catch((err) => {
@@ -249,6 +252,22 @@ class AccentRouter {
             });
     }
 
+    /**
+     * Alias of static AccentRouter.route function
+     * @param {string} destination - The destination of the routing operation
+     * @param {boolean} root - Is the route to be executed as root (mimic initial routing operation)?
+     * @param {HTMLElement} pane - The element inside of which content will be loaded
+     */
+    async route(destination, root, pane) {  AccentRouter.route(this, ...arguments);  }
+
+    /**
+     * 
+     * Route pane to a certain destination.
+     * @param {AccentRouter} router - The AccentRouter instance that is being used for the routing operation.
+     * @param {string} destination - The destination of the routing operation. 
+     * @param {boolean} root - Is the route to be executed as root (mimic initial routing operation)?
+     * @param {HTMLElement} pane - The element inside of which content will be loaded. 
+     */
     static async route(router, destination, root, pane) {
         document.dispatchEvent(AccentRouterEvents.ROUTING_STARTED); // Dispatch event for routing started
         const route = AccentRouter._getRouteFromInput(router, destination); // Get the route from the given input
@@ -261,6 +280,12 @@ class AccentRouter {
         });
     }
 
+    /**
+     * 
+     * @param {AccentRouter} router 
+     * @param {string} destination 
+     * @returns 
+     */
     static _getRouteFromInput(router, destination) {
         if (router.routes[destination]) {
             return { destination: destination };
@@ -296,6 +321,11 @@ class AccentRouter {
         }
     }
 
+    /**
+     * Format a dynamic path source using regular expressions to return a raw path. 
+     * @param {string} path - The path that is to be formatted
+     * @returns 
+     */
     static #formatDynamicRouterPath(path) {
         return Array.isArray(path) ?
             path.map((p) => p.replace(AccentRouterConfig.ROUTER_DYNAMIC_LINK, '')) :
