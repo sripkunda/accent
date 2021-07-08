@@ -9,6 +9,7 @@ node_modules/
 
 # exceptions
 !src/*.js
+!package/
 !package-lock.json
 !package.json
 !.eslintrc.js

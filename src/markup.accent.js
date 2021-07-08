@@ -16,7 +16,7 @@ class AccentDOMController {
                 AccentMarkup._transpile(node.parentElement ?? node); // If so call transpile() on the parentElement (or the element itself, assuming that there is no parent element).
               }
             };
-            bTranspile(node);
+            bTranspile(node); // Run the bTranspile function to transpile the nodes
           }
         });
       } else if (mutation.type == 'attributes') {
