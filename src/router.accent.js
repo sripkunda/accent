@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 /** Class that represents the AccentRouter **/
 class AccentRouter {
@@ -23,10 +23,10 @@ class AccentRouter {
     (async () => {
       // FInd routes
       this.routes =
-        typeof routes === 'object' ?
-          routes :
-          await AccentRouter.#fetch(routes, 'json').then((routes) => {
-            document.dispatchEvent(AccentRouterEvents.ROUTES_RECOGNIZED); // After routes are recognized,
+        typeof routes === "object"
+          ? routes
+          : await AccentRouter.#fetch(routes, "json").then((routes) => {
+            document.dispatchEvent(_AccentRouterEvents.ROUTES_RECOGNIZED); // After routes are recognized,
             return routes; // Return the routes to assign the value
           });
       this.defaultPane = pane; // Assign the default pane for this router
@@ -39,6 +39,8 @@ class AccentRouter {
           document.dispatchEvent(v); // Dispatch the event for caching all of the pages asynchronously
         });
       }
+
+      document.dispatchEvent(_AccentRouterEvents.ROUTER_INIT);
     })();
   }
 
@@ -46,7 +48,7 @@ class AccentRouter {
    * Add a popstate listener for browser forward and back to ensure that routing is being used.
    */
   async #beginNavigation() {
-    window.addEventListener('popstate', (event) => {
+    window.addEventListener("popstate", (event) => {
       AccentRouter.route(this, window.location.pathname, true);
     });
   }
@@ -58,11 +60,16 @@ class AccentRouter {
     return await new Promise((res, rej) => {
       const routes = Object.keys(this.routes);
       routes.forEach(async (r, i) => {
+        if (
+          this.routes[r].load == _AccentRouteLoadTypes.LOAD_LAZY ||
+          this.routes[r].load == _AccentRouteLoadTypes.LOAD_UNCACHED
+        )
+          return;
         this.#routerCache[r] = {
           name: r,
           html: await this.#fetchPageAsync(r),
         };
-        if (routes.length == i + 1) res(AccentRouterEvents.ROUTES_LOADED_ASYNC);
+        if (routes.length == i + 1) res(_AccentRouterEvents.ROUTES_LOADED_ASYNC);
       });
     }).then((v) => {
       return v;
@@ -80,83 +87,79 @@ class AccentRouter {
     // Get the routing information
     targetPane =
       targetPane ||
-      document.querySelector(`[${AccentRouterConfig.ROUTER_PANE_DIRECTIVE}`) ||
+      document.querySelector(`[${_AccentRouterConfig.ROUTER_PANE_DIRECTIVE}`) ||
       document.documentElement; // Get the pane to insert elements onto
-    const cache = this.#routerCache ?
-      this.#routerCache[destination] :
-      undefined; // Get document data from routerCache
-    const route = cache?.html ?
-      cache :
-      await this.#fetchPage(destination ?? this.routes); // Get the page data for the destination
-    const doc = new DOMParser().parseFromString(route.html, 'text/html'); // Parse the document data as HTML
+    this.defaultPane = targetPane;
+    const cache = this.#routerCache
+      ? this.#routerCache[destination]
+      : undefined; // Get document data from routerCache
+    const route = cache?.html
+      ? cache
+      : await this.#fetchPage(destination ?? this.routes); // Get the page data for the destination
+    const doc = new DOMParser().parseFromString(route.html, "text/html"); // Parse the document data as HTML
 
     // Get the final path that needs to be pushed to the history
-    let path = Array.isArray(this.routes[route.name]['path']) ?
-      this.routes[route.name]['path'][0] : // If the path is an array, then get the 0th element of the paths array
-      this.routes[route.name]['path']; // Otherwise, get the path normally
+    let path = Array.isArray(this.routes[route.name]["path"])
+      ? this.routes[route.name]["path"][0] // If the path is an array, then get the 0th element of the paths array
+      : this.routes[route.name]["path"]; // Otherwise, get the path normally
 
     // Replace all instances of ':param' in the path with the appropriate parameter.
-    path = path.replace(AccentRouterConfig.ROUTER_DYNAMIC_LINK, (_a, b) => {
-      return `${parameters ? (parameters[b] ? `${parameters[b]}/` : '') : ''}`;
+    path = path.replace(_AccentRouterConfig.ROUTER_DYNAMIC_LINK, (_a, b) => {
+      return `${parameters ? (parameters[b] ? `${parameters[b]}/` : "") : ""}`;
     });
 
-    this.params = parameters; // Set the routing parameters for this route.
+    this.params = parameters || {}; // Set the routing parameters for this route.
 
     // Replace browser state
-    const content = {content: '', title: doc.title}; // The content of the history state
-    isRoot ?
-      window.history.replaceState(content, doc.title, path) :
-      window.history.pushState(content, doc.title, path); // Replace browser history with the new state
+    const content = { content: "", title: doc.title }; // The content of the history state
+    isRoot
+      ? window.history.replaceState(content, doc.title, path)
+      : window.history.pushState(content, doc.title, path); // Replace browser history with the new state
 
     if (doc.title) document.title = doc.title;
 
     // Append the innerHTML
-    targetPane.innerHTML = ''; // Clear the existing page content of the pane
+    targetPane.innerHTML = ""; // Clear the existing page content of the pane
 
-    // Find the pane that needs to be appended on to
+    // Find the content to append on the document
     const toAppend =
-      targetPane == document.documentElement ?
-        doc.documentElement :
-        doc.querySelector(`[${AccentRouterConfig.ROUTER_TARGET_DIRECTIVE}]`);
+      targetPane == document.documentElement
+        ? doc.documentElement
+        : doc.querySelector(`[${_AccentRouterConfig.ROUTER_TARGET_DIRECTIVE}]`);
 
-    // If the pane cannot be found, then throw an error
-    if (!toAppend) {
-      throw Error(
-          `Accent.js: '${AccentRouterConfig.ROUTER_TARGET_DIRECTIVE}' is not found in page '${destination}.' If the routing pane is explicitly defined, a ${AccentRouterConfig.ROUTER_TARGET_DIRECTIVE} must be set for all routed pages.`,
-      );
-    }
+    // If the target cannot be found, then throw an error
+    if (!toAppend) { throw _AccentRouterErrors.TARGET_NOT_FOUND(route.name); }
 
     // Configuration for protected routes
     const prot = toAppend.getAttribute(
-        AccentRouterConfig.ROUTER_PROTECT_DIRECTIVE,
+      _AccentRouterConfig.ROUTER_PROTECT_DIRECTIVE
     );
     const fallback = toAppend.getAttribute(
-        AccentRouterConfig.ROUTER_FALLBACK_DIRECTIVE,
+      _AccentRouterConfig.ROUTER_FALLBACK_DIRECTIVE
     );
 
     // If this route is protected and a required parameter is missing, route to the fallback
     if (prot && (!this.params || !this.params[prot])) {
-      if (fallback) {
-        return AccentRouter.route(this, fallback); // If there is a fallback, route to the fallback
-      } else {
-        throw Error(`Accent.js: Protected routes must have a router fallback.`); // Otherwise throw an error
-      }
+      if (fallback)
+        return AccentRouter.route(this, fallback)
+      else
+        throw _AccentRouterErrors.UNPROTECTED_ROUTE(route.name);
     }
 
     targetPane.append(toAppend);
 
     // Execute javascript, load css, configure routing links
     doc
-        .querySelectorAll('link[rel=stylesheet], style')
-        .forEach((s) => targetPane.append(s));
-    this.currentRoute = route.id; // Change the current route for developers to use
+      .querySelectorAll("link[rel=stylesheet], style")
+      .forEach((s) => targetPane.append(s));
+    this.currentRoute = route.name; // Change the current route for developers to use
     this.#executeScripts(doc, route.name); // Execute javascript on the doc before adding it to the pane (make sure that external script tags are captured)
     this.#executeScripts(targetPane, route.name); // Execute javascript on the pane
     this.#configureRoutingLinks(); // Detect routing links and add appropriate event listeners
 
-    // If the AccentMarkup module is attached, transpile the page again to account for the changes
-    if (typeof AccentMarkup !== 'undefined') {
-      AccentMarkup._transpile(targetPane);
+    // If the AccentRenderer module is attached, transpile the page again to account for the changes
+    if (typeof AccentRenderer !== "undefined") {
+      AccentRenderer._transpile(targetPane);
     }
 
     return;
@@ -169,11 +172,11 @@ class AccentRouter {
     // Create a new promise, wait for it to finished, and return the result
     return await new Promise((res, rej) => {
       // If routes is an object, then loop through it and find the entry point.
-      if (typeof routes === 'object') {
+      if (typeof routes === "object") {
         Object.keys(routes).forEach(async (route, i) => {
-          const path = routes[route]['path'];
+          const path = routes[route]["path"];
           // Look for '/' in the path to determine if it is the entry point
-          if (path == '/' || (Array.isArray(path) && path.includes('/'))) {
+          if (path == "/" || (Array.isArray(path) && path.includes("/"))) {
             res(route);
           } // Resolve the promise as soon as the entry point is found
         });
@@ -183,11 +186,13 @@ class AccentRouter {
       }
     }).then(async (data) => {
       if (!data) data = Object.keys(this.routes)[0]; // If the destination is still undefined, take the first route given as the entry point.
-      this.#routerCache[data] = {
+      const json = {
         name: data,
         html: await this.#fetchPageAsync(data),
-      }; // Update the routerCache with the newly fetched page.
-      return this.#routerCache[data]; // Return the routerCache for this route
+      };
+      if (!(this.routes[data].load == _AccentRouteLoadTypes.LOAD_UNCACHED))
+        this.#routerCache[data] = json; // Update the routerCache with the newly fetched page.
+      return json; // Return the routerCache for this route
     });
   }
 
@@ -197,12 +202,10 @@ class AccentRouter {
    */
   async #fetchPageAsync(route) {
     try {
-      const path = this.#formatPath(`${this.routes[route]['src']}`); // Get the formatted path from the route
-      return await AccentRouter.#fetch(path, 'html'); // Return the HTML
+      const path = this.#formatPath(`${this.routes[route]["src"]}`); // Get the formatted path from the route
+      return await AccentRouter.#fetch(path, "html"); // Return the HTML
     } catch {
-      throw Error(
-          `Accent.js: router could not load source for ${route} (src: ${this.routes[route]['src']})`,
-      ); // Throw an error if a certain page could not be loaded.
+      throw _AccentRouterErrors.SOURCE_NOT_FOUND(route);
     }
   }
 
@@ -212,21 +215,23 @@ class AccentRouter {
    * @param  {string} route - The route that is being executed from (to load from routerCache if possible)
    */
   async #executeScripts(doc, route) {
-    doc.querySelectorAll('script').forEach(async (el) => {
-      const src = el.getAttribute('src');
+    doc.querySelectorAll("script").forEach(async (el) => {
+      const src = el.getAttribute("src");
       const path = src ? this.#formatPath(src) : undefined;
       try {
-        if (path && path.trim() != '') {
-          const content =
+        let content;
+        if (path?.trim()) {
+          content =
             this.#routerCache[route][path] ??
             (await (await fetch(path)).text());
-          this.#routerCache[route][path] = content;
-          if (content) Function(content)();
+          if (!(this.routes[route].load == _AccentRouteLoadTypes.LOAD_UNCACHED))
+            this.#routerCache[route][path] = content;
         } else {
-          Function(el.innerHTML)();
+          content = el.innerHTML;
         }
+        if (content) Function(content)();
       } catch (err) {
-        throw Error(`${path} (via Accent.js) ${err}`);
+        throw _AccentRouterErrors.BASE_ERROR(`${path || this.routes[route]["src"]}: ${err}`);
       }
     });
   }
@@ -237,19 +242,19 @@ class AccentRouter {
   #configureRoutingLinks() {
     // Loop through the router links using the router link directive
     document
-        .querySelectorAll(`[${AccentRouterConfig.ROUTER_LINK_DIRECTIVE}]`)
-        .forEach((el) => {
-          const href = el.getAttribute(
-              `${AccentRouterConfig.ROUTER_LINK_DIRECTIVE}`,
-          ); // Get the destination
-          if (!href) return; // Exit if the href does not exist
+      .querySelectorAll(`[${_AccentRouterConfig.ROUTER_LINK_DIRECTIVE}]`)
+      .forEach((el) => {
+        const href = el.getAttribute(
+          `${_AccentRouterConfig.ROUTER_LINK_DIRECTIVE}`
+        ); // Get the destination
+        if (!href) return; // Exit if the href does not exist
 
-          // Add the onclick event
-          el.onclick = (event) => {
-            event.preventDefault();
-            AccentRouter.route(this, href, false, this.defaultPane); // Route on clicked to the destination
-          };
-        });
+        // Add the onclick event
+        el.onclick = (event) => {
+          event.preventDefault();
+          AccentRouter.route(this, href, false, this.defaultPane); // Route on clicked to the destination
+        };
+      });
   }
 
   /**
@@ -258,7 +263,7 @@ class AccentRouter {
    * @return {string} - The formatted path
    */
   #formatPath(path) {
-    return `//${window.location.host.replace(/\/$/, '')}/${path}`;
+    return `//${window.location.host.replace(/\/$/, "")}/${path}`;
   }
 
   /**
@@ -269,26 +274,23 @@ class AccentRouter {
   static async #fetch(path, type) {
     // Fetch from the path and return the appropriate type
     return await fetch(path)
-        .then(async (response) => {
-          if (!response.ok) {
-          // Return an error if a certain page could not loaded
-            throw new Error(`HTTP error ${response.status}`);
-          }
-          // Return the data for the appropriate data type
-          switch (type.toLowerCase()) {
-            case 'json':
-              return response.json(); // Return the JSON
-            case 'html':
-              const html = await response.text();
-              // Convert the HTML string into a document object
-              return html; // Return the HTML
-          }
-        })
-        .catch((err) => {
-          throw Error(
-              `Accent.js: There was a problem while getting ${type} from ${path}`,
-          );
-        });
+      .then(async (response) => {
+        if (!response.ok) {
+          throw Error();
+        }
+        // Return the data for the appropriate data type
+        switch (type.toLowerCase()) {
+          case "json":
+            return response.json(); // Return the JSON
+          case "html":
+            const html = await response.text();
+            // Convert the HTML string into a document object
+            return html; // Return the HTML
+        }
+      })
+      .catch((err) => {
+        throw _AccentRouterErrors.SOURCE_NOT_FOUND(path);
+      });
   }
 
   /**
@@ -296,7 +298,7 @@ class AccentRouter {
    * @param {...any} args - The arguments for the specific routing operation
    */
   async route(...args) {
-    AccentRouter.route(this, args);
+    AccentRouter.route(this, ...args);
   }
 
   /**
@@ -308,68 +310,81 @@ class AccentRouter {
    * @param {HTMLElement} pane - The element inside of which content will be loaded.
    */
   static async route(router, destination, root, pane) {
-    document.dispatchEvent(AccentRouterEvents.ROUTING_STARTED); // Dispatch event for routing started
+    document.dispatchEvent(_AccentRouterEvents.ROUTING_STARTED); // Dispatch event for routing started
     const route = AccentRouter._getRouteFromInput(router, destination); // Get the route from the given input
-
     // Fill the pane with the new page
     await router
-        .fillPane(route.destination, root, route.dynamics, pane)
-        .then((v) => {
-          document.dispatchEvent(AccentRouterEvents.ROUTING_ENDED); // After routing ended, dispatch the appropriate event.
-        })
-        .catch((e) => {
-          document.dispatchEvent(AccentRouterEvents.ROUTING_FAILED); // If the routing failed, dispatch the appropriate event.
-        });
+      .fillPane(route.destination, root, route.dynamics, pane)
+      .then((v) => {
+        document.dispatchEvent(_AccentRouterEvents.ROUTING_ENDED); // After routing ended, dispatch the appropriate event.
+      })
+      .catch((e) => {
+        document.dispatchEvent(_AccentRouterEvents.ROUTING_FAILED); // If the routing failed, dispatch the appropriate event.
+        throw e;
+      });
   }
 
   /**
-   * Get the routing information for a specified route. 
+   * Get the routing information for a specified route.
    * @param {AccentRouter} router - The router that the operation is executed upon
    * @param {(Array|string)} destination - The destination (or "target") route
    * @return {Object} - The final routing data
    */
   static _getRouteFromInput(router, destination) {
+    destination = destination.replace(/\/$/, "");
     if (router.routes[destination]) {
-      return {destination: destination};
+      return { destination: destination };
     } else {
-      const destinationFrags = destination.split('/');
-      let p;
-      let dynamics = {};
-      Object.keys(router.routes).every((r) => {
-        dynamics = {};
-        const frags = [...destinationFrags];
-        const path = router.routes[r].path;
-        const pathFrags = Array.isArray(path) ?
-          path.map((d) => d.split('/')) :
-          path.split('/');
+      try {
+        const destinationFrags = destination.split("/");
+        let p;
+        let dynamics;
+        Object.keys(router.routes).every((r) => {
+          dynamics = {};
+          const frags = [...destinationFrags];
+          const path = router.routes[r].path;
+          const pathFrags = Array.isArray(path)
+            ? path.map((d) => d.split("/"))
+            : path.split("/");
+          return pathFrags.every((exec, i) => {
+            let exp;
 
-        return pathFrags.every((f, i) => {
-          const exec = Array.isArray(f) ? f[0] : f;
-          let exp;
-          while (
-            (exp = AccentRouterConfig.ROUTER_DYNAMIC_LINK_ISOLATED.exec(exec))
-          ) {
-            const index = i - (destinationFrags.length - frags.length);
-            if (frags[index]) dynamics[exp[1]] = decodeURI(frags[index]);
-            frags.splice(index, 1);
-          }
-          let formattedPath = AccentRouter.#formatDynamicRouterPath(path);
-          formattedPath = Array.isArray(formattedPath) ?
-            formattedPath.map((p) => p.replace(/\/$/, '')) :
-            formattedPath.replace(/\/$/, '');
-          const formattedDestination = frags.join('/').replace(/\/$/, '');
-          if (
-            formattedPath == formattedDestination ||
-            (Array.isArray(formattedPath) &&
-              formattedPath.includes(formattedDestination))
-          ) {
-            p = r;
-            return false;
-          }
-          return true;
+            const cleanFrags = (exec, pathIndex) => {
+              while (exp = _AccentRouterConfig.ROUTER_DYNAMIC_LINK_ISOLATED.exec(exec)) {
+                const index = pathIndex - (destinationFrags.length - frags.length);
+                if (frags[index]) dynamics[exp[1]] = decodeURI(frags[index]);
+                frags.splice(index, 1);
+              }
+            };
+
+            if (Array.isArray(exec)) {
+              exec.forEach((e, i) => {
+                cleanFrags(e, i);
+              });
+            } else {
+              cleanFrags(exec, i);
+            }
+
+            let formattedPath = AccentRouter.#formatDynamicRouterPath(path);
+            formattedPath = Array.isArray(formattedPath)
+              ? formattedPath.map((p) => p.replace(/\/$/, ""))
+              : formattedPath.replace(/\/$/, "");
+            const formattedDestination = frags.join("/").replace(/\/$/, "");
+            if (
+              formattedPath == formattedDestination ||
+              (Array.isArray(formattedPath) &&
+                formattedPath.includes(formattedDestination))
+            ) {
+              p = r;
+              return false;
+            }
+            return true;
+          });
         });
-      });
-      return {destination: p, dynamics: dynamics};
+        return { destination: p, dynamics: dynamics };
+      } catch {
+        throw _AccentRouterErrors.ROUTE_NOT_DETERMINED();
+      }
     }
   }
 
@@ -379,9 +394,9 @@ class AccentRouter {
    * @return {string} - The formatted path
    */
   static #formatDynamicRouterPath(path) {
-    return Array.isArray(path) ?
-      path.map((p) => p.replace(AccentRouterConfig.ROUTER_DYNAMIC_LINK, '')) :
-      path.replace(AccentRouterConfig.ROUTER_DYNAMIC_LINK, '');
+    return Array.isArray(path)
+      ? path.map((p) => p.replace(_AccentRouterConfig.ROUTER_DYNAMIC_LINK, ""))
+      : path.replace(_AccentRouterConfig.ROUTER_DYNAMIC_LINK, "");
   }
 }
 
@@ -394,13 +409,11 @@ const $link = (router, el, destination) => {
   };
 };
 
-const $router = AccentRouter; // Alias for AccentRouter
-
 /**
  * Configuration for router directives, expressions, and settings.
  * @namespace
  */
-const AccentRouterConfig = {
+const _AccentRouterConfig = {
   ROUTER_DYNAMIC_LINK: /:(.+?)\//g,
   ROUTER_DYNAMIC_LINK_ISOLATED: /:(.+)/g,
   ROUTER_PANE_DIRECTIVE: `router-pane`,
@@ -414,10 +427,51 @@ const AccentRouterConfig = {
  * Custom events for the AccentRouter module.
  * @namespace
  */
-const AccentRouterEvents = {
-  ROUTES_RECOGNIZED: new Event('router:routes-recognized'),
-  ROUTING_STARTED: new Event('router:routing-started'),
-  ROUTING_ENDED: new Event('router:routing-ended'),
-  ROUTES_LOADED_ASYNC: new Event('router:routes-loaded-async'),
-  ROUTING_FAILED: new Event('router:routing-failed'),
+const _AccentRouterEvents = {
+  ROUTES_RECOGNIZED: new Event("router:routes-recognized"),
+  ROUTER_INIT: new Event("router:router-init"),
+  ROUTING_STARTED: new Event("router:routing-started"),
+  ROUTING_ENDED: new Event("router:routing-ended"),
+  ROUTES_LOADED_ASYNC: new Event("router:routes-loaded-async"),
+  ROUTING_FAILED: new Event("router:routing-failed"),
 };
+
+/**
+ * The different load types for AccentRouter routes
+ * @namespace
+ */
+const _AccentRouteLoadTypes = {
+  LOAD_LAZY: "lazy",
+  LOAD_UNCACHED: "uncached",
+  LOAD_ASYNC: "async",
+};
+
+/**
+ * Potential errors for AccentRouter
+ */
+const _AccentRouterErrors = {
+  AccentLibraryName: `Accent.js Router`,
+  ROUTE_NOT_FOUND: (...params) => {
+    return `${_AccentRouterErrors.AccentLibraryName}: The specified route ('${params[0]}') was not found.`;
+  },
+  TARGET_NOT_FOUND: (...params) => {
+    return `${_AccentRouterErrors.AccentLibraryName}: A router target could not be found for route '${params[0]}'.`;
+  },
+  UNPROTECTED_ROUTE: (...params) => {
+    return `${_AccentRouterErrors.AccentLibraryName}: The fallback for protected route '${params[0]}' was not found.`;
+  },
+  JSON_PARSE: (...params) => {
+    return `${_AccentRouterErrors.AccentLibraryName}: The provided JSON input could not be parsed from ${params[0]}.`;
+  },
+  ROUTE_NOT_DETERMINED: (...params) => {
+    return `${_AccentRouterErrors.AccentLibraryName}: A route could not be determined from the destination '${params[0]}'. Please ensure that the initial routes data and destination are properly formatted.`;
+  },
+  SOURCE_NOT_FOUND: (...params) => {
+    return `${_AccentRouterErrors.AccentLibraryName}: An error occurred while fetching the source for ${params[0]}.`;
+  },
+  BASE_ERROR: (e) => {
+    return `${_AccentRouterErrors.AccentLibraryName}: ${e}`;
+  }
+}
+
+const $router = (...args) => { return new AccentRouter(...args); } // AccentRouter initialization function

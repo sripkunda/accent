@@ -1,5 +1,6 @@
 # internals/dev
 node_modules/
+docs/
 
 # testing
 *.html

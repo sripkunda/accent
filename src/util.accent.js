@@ -1,7 +1,15 @@
-'use strict';
+"use strict";
 
-// Utility object
+/**
+ * Accent's internal utility object with global accessor functions
+ */
 const AccentUtil = {
+  /**
+   * Create an AccentNodeList from an HTMLElement or selector
+   * @param {(string|HTMLElement|NodeList)} sel - Selector or object to create AccentNodeList from
+   * @param {number} num - The index of the NodeList to create the object from
+   * @return {AccentNodeList} - The newly created NodeList
+   */
   _get: (sel, num) => {
     let els = typeof sel === "object" ? sel : document.querySelectorAll(sel);
     if (!(els instanceof NodeList)) {
@@ -9,41 +17,71 @@ const AccentUtil = {
     }
     if (els.length > 0) return new AccentNodeList(els[num] ?? els);
   },
-  _onReady: (r, e) => {
-    r.onreadystatechange = (ev) => {
-      if (r.readyState == "interactive") {
-        e(ev);
+  /**
+   * Add a readyState event handler to a given element.
+   * @param {HTMLElement} element - The element to add the event listener to.
+   * @param {function} action - The function that is to be executed when ready.
+   */
+  _onReady: (element, action) => {
+    element.onreadystatechange = (ev) => {
+      if (element.readyState == "interactive") {
+        action(ev);
       }
     };
   },
+  /**
+   * Log a new warning into the console
+   * @param {string} msg - The content of the warning
+   */
   _err: (msg) => {
     console.warn(msg);
   },
 };
 
+/**
+ * The extension of the JavaScript Object with attached utility functions.
+ */
 class AccentUtilObject extends Object {
+  /**
+   * Instantiate a new AccentUtilObject
+   * @param {Object} obj - The object content of the object.
+   */
   constructor(obj) {
     super();
     AccentUtilObject.assign(this, obj);
   }
 
+  /**
+   * Loops through the keys of an Object.
+   * @param {function} callback - The callback to be executed for each key of the object
+   */
   each(callback) {
-    console.log(this);
     Object.keys(this).forEach((mem, ind, arr) => {
       callback(this[mem], mem, ind, arr);
     });
   }
 
+  /**
+   * Converts an Object to a Map
+   * @return {Map} - The newly created Map.
+   */
   toMap() {
     return new Map(Object.entries(this));
   }
 
-  keyOf(key, val, last) {
+  /**
+   * Find the key of an element in an object
+   * @param {string} key - The key to look for in the Object
+   * @param {*} val - The value to look for in the Object
+   * @param {boolean} bLast - Take the last found element of the Object (lastKeyOf)?
+   * @return {string} - The key that was found with the given parameters.
+   */
+  keyOf(key, val, bLast) {
     let i = undefined;
     Object.keys(this).every((k) => {
       if (this[k][key] == val) {
         i = k;
-        if (!last) return false;
+        if (!bLast) return false;
         return true;
       }
       return true;
@@ -51,15 +89,27 @@ class AccentUtilObject extends Object {
     return i;
   }
 
+  /**
+   * Find the last key of an element in an Object.
+   * @param {string} key - The key to look for in the Object
+   * @param {*} val - The value to look for in the Object
+   * @return {string} - The last key that was found with the given parameters.
+   */
   lastKeyOf(key, val) {
     return this.keyOf(key, val, true);
   }
 
-  filter(callback, first) {
+  /**
+   * Filter an Object with a callback function
+   * @param {function} callback - A filtering determiner that
+   * @param {boolean} bFirst - Take the first element of the object (find)?
+   * @return {Object} - The resulting object of the filter
+   */
+  filter(callback, bFirst) {
     let res = {};
     Object.keys(this).every((key) => {
       if (callback(this[key])) {
-        if (first) {
+        if (bFirst) {
           res = this[key];
           return false;
         }
@@ -70,13 +120,24 @@ class AccentUtilObject extends Object {
     return res;
   }
 
+  /**
+   * Find the first element that returns true for a given callback
+   * @param {function} callback - The callback that is to be evaluated
+   * @returns
+   */
   find(callback) {
     return this.filter(callback, true);
   }
 }
 
-// An AccentNodeList that stores HTML elements for use
+/**
+ * A stored Array of HTMLElements that can be manipulated using utility functions
+ */
 class AccentNodeList extends Array {
+  /**
+   * Instantiate a new AccentNodeList
+   * @param {(NodeList|Array|HTMLCollection)} el - The collection of elements to create the AccentNodeList out of
+   */
   constructor(el) {
     super();
     (el instanceof NodeList || el instanceof HTMLCollection || Array.isArray(el)
@@ -87,33 +148,59 @@ class AccentNodeList extends Array {
     });
   }
 
-  /* Element mapping to plain es6 */
+  /* DOM Manipulation */
 
+  /**
+   * Get the children of each element in an AccentNodeList
+   * @return {(AccentNodeCollection|AccentNodeList)} - The list(s) of children
+   */
   children() {
     return this.getDOM("children");
   }
 
+  /**
+   * Get the first child of each element in an AccentNodeList
+   * @return {(AccentNodeCollection|AccentNodeList)} - The list of the first child elements for each element in the AccentNodeList
+   */
   child() {
     return this.getDOM("firstElementChild", true);
   }
 
+  /**
+   * Get the last child of each element in an AccentNodeList
+   * @return {(AccentNodeCollection|AccentNodeList)} - The list of the last child elements for each element in the AccentNodeList
+   */
   lastChild() {
     return this.getDOM("lastElementChild", true);
   }
 
+  /**
+   * Get the parent elements of each element in an AccentNodeList
+   * @return {(AccentNodeCollection|AccentNodeList)} - The list of the parent elements for each element in the AccentNodeList
+   */
   parents() {
     return this.getDOM("parentElement");
   }
 
+  /**
+   * Get the first parent element of each element in an AccentNodeList
+   * @return {(AccentNodeCollection|AccentNodeList)} - The list of the first parent elements for each element in the AccentNodeList
+   */
   parent() {
     return this.getDOM("parentElement", true);
   }
 
-  getDOM(at, first) {
+  /**
+   * Gets a certain attribute of each element in an AccentNodeList and returns it
+   * @param {string} at - The attribute to get for each element
+   * @param {boolean} bFirst - Whether or not to take the "first" found element for each attribute
+   * @return {(AccentNodeCollection|AccentNodeList)} - An appropriate collection of the found elements
+   */
+  getDOM(at, bFirst) {
     // TODO refactor this, by far the ugliest code in existence
     const obj = {};
     Array.from(this).every((e, i) => {
-      if (first) {
+      if (bFirst) {
         obj[i] = e[at];
         return true;
       }
@@ -146,14 +233,22 @@ class AccentNodeList extends Array {
 
   /* Working with the DOM */
 
+  /**
+   * Appends HTML text to each element in an AccentNodeList
+   * @param {string} val - The HTML content to append
+   */
   append(val) {
     if (!val)
       return AccentUtil._err(
         "accent.js: $el(...).append() was used without any parameters"
       );
-    return this.set("innerHTML", val, true);
+    this.set("innerHTML", val, true);
   }
 
+  /**
+   * Prepends HTML text to each element in an AccentNodeList
+   * @param {*} val - The HTML content to prepend
+   */
   prepend(val) {
     if (!val)
       return AccentUtil._err(
@@ -164,27 +259,61 @@ class AccentNodeList extends Array {
     });
   }
 
+  /**
+   * Change/get the HTML of each element in an AccentNodeList
+   * @param {*} val - The new HTML
+   * @param {boolean} concat - Whether or not to concatinate the HTML with the existing value
+   * @return {(string|string[])} - The HTML of each element in the AccentNodeList
+   */
   html(val, concat) {
     return this.get("innerHTML", val) ?? this.set("innerHTML", val, concat);
   }
 
+  /**
+   * Change/get the textContent of each element in an AccentNodeList
+   * @param {*} val - The new textContent
+   * @param {boolean} concat - Whether or not to concatinate the textContent with the existing value
+   * @return {(string|string[])} - The textContent of each element in the AccentNodeList
+   */
   text(val, concat) {
     return this.get("textContent", val) ?? this.set("textContent", val, concat);
   }
 
+  /**
+   * Change/get the value of each element in an AccentNodeList
+   * @param {*} val - The new value
+   * @param {boolean} concat - Whether or not to concatinate the value with the existing value
+   * @return {(string|string[])} - The value of each element in the AccentNodeList
+   */
   val(val, concat) {
     return this.get("value", val) ?? this.set("value", val, concat);
   }
 
+  /**
+   * Change/get the style of each element in an AccentNodeList
+   * @param {*} val - The new style
+   * @return {(string|string[])} - The style of each element in the AccentNodeList
+   */
   style(val) {
     return this.get("style", val) ?? this.set("style", val, false);
   }
 
+  /**
+   * Get a certain attribute of each element in an AccentNodeList
+   * @param {string} attr - The attribute to get
+   * @param {*} val - The value of the element passed to the setter functxion
+   * @return {(string|string[])} - The attribute of each element in the AccentNodeList if the value given to the setter is falsish
+   */
   get(attr, val) {
     const vals = Array.from(this).map((e) => e[attr]);
     if (!val) return vals.length > 1 ? vals : vals[0];
   }
 
+  /**
+   * Add/remove a class for each element in the AccentNodeList
+   * @param {*} val - The class to perform the action on
+   * @param {(string|boolean)} action - Whether to add/remove the class. (true = add, false = remove, 'add' = add, 'remove' = remove)
+   */
   class(val, action) {
     const chng = (e, c) => {
       action || action == "add"
@@ -206,6 +335,12 @@ class AccentNodeList extends Array {
     );
   }
 
+  /**
+   * Change/get a specific attribute for every
+   * @param {*} attr - The attribute to set/change
+   * @param {*} val - The value of the attribute
+   * @return {(string|string[])} - The reqeusted attribute of each element in the AccentNodeList if the value given is falsish
+   */
   attr(attr, val) {
     if (!val) {
       const arr = Array.from(this).map((e) => e.getAttribute(attr));
@@ -217,6 +352,13 @@ class AccentNodeList extends Array {
     }
   }
 
+  /**
+   * Sets the value of a certain attribute for each element in an AccentNodeList
+   * @param {*} attr
+   * @param {*} val
+   * @param {*} concat
+   * @param {*} callback - The
+   */
   set(attr, val, concat, callback) {
     super.forEach.call(this, (e) => {
       callback =
@@ -236,45 +378,50 @@ class AccentNodeList extends Array {
 
   /* Events */
 
+  /**
+   * Add an event listener to each element in an AccentNodeList
+   * @param {string} ev - The event to add
+   * @param {*} callback - The handler of the event
+   */
   on(ev, callback) {
     super.forEach.call(this, (e) => {
       e.addEventListener(ev, callback);
     });
   }
 
-  click(callback) {
+  click(...callback) {
     this.on("click", callback);
   }
 
-  mouseup(callback) {
+  mouseup(...callback) {
     this.on("mouseup", callback);
   }
 
-  mousedown(callback) {
+  mousedown(...callback) {
     this.on("mousedown", callback);
   }
 
-  keyup(callback) {
+  keyup(...callback) {
     this.on("mousedown", callback);
   }
 
-  keydown(callback) {
+  keydown(...callback) {
     this.on("keydown", callback);
   }
 
-  keypress(callback) {
+  keypress(...callback) {
     this.on("keypress", callback);
   }
 
-  input(callback) {
+  input(...callback) {
     this.on("input", callback);
   }
 
-  change(callback) {
+  change(...callback) {
     this.on("change", callback);
   }
 
-  load(callback) {
+  load(...callback) {
     this.on("load", callback);
   }
 
@@ -284,6 +431,10 @@ class AccentNodeList extends Array {
     this.forEach(callback);
   }
 
+  /**
+   * Execute a function for each element in an AccentNodeList
+   * @param {callback} callback - The function that will be executed for each element in the AccentNodeList
+   */
   forEach(callback) {
     super.forEach((e, i) => callback(new AccentNodeList(e), i));
   }
@@ -295,18 +446,29 @@ class AccentNodeCollection extends AccentNodeList {
     this.forEach(callback);
   }
 
+  /**
+   * Add an event listener to each element of the AccentNodeList in an AccentNodeCollection
+   * @param {*} ev - The event to add
+   * @param {*} callback - The event handler
+   */
   on(ev, callback) {
     this.forEach((e) => {
       e.on(ev, callback);
     });
   }
 
+  /**
+   * Set a certain attribute of all stored elements in this AccentNodeCollection
+   */
   set(attr, val, concat, callback) {
     this.forEach((e) => {
       e.set(attr, val, concat, callback);
     });
   }
 
+  /**
+   * Get a certain attribute of all stored elements in this AccentNodeCollection
+   */
   get(attr, val) {
     this.forEach((e) => {
       e.get(attr, val);
@@ -314,7 +476,9 @@ class AccentNodeCollection extends AccentNodeList {
   }
 }
 
-// Util
+/**
+ * Public utility object with helper methods and elements
+ */
 const Ac = {
   /* Dom */
   doc: document,
