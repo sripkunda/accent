@@ -1,7 +1,7 @@
 "use strict";
 
 /** Class that represents the AccentRouter **/
-class AccentRouter {
+class Router {
   routes; // The routes that are to be stored
   currentRoute; // The current route of the system
   defaultPane; // The default pane for this router
@@ -25,12 +25,12 @@ class AccentRouter {
       this.routes =
         typeof routes === "object"
           ? routes
-          : await AccentRouter.#fetch(routes, "json").then((routes) => {
+          : await Router.#fetch(routes, "json").then((routes) => {
             document.dispatchEvent(_AccentRouterEvents.ROUTES_RECOGNIZED); // After routes are recognized,
             return routes; // Return the routes to assign the value
           });
       this.defaultPane = pane; // Assign the default pane for this router
-      await AccentRouter.route(this, location.pathname, true, pane); // Route to the new path based on the pathname
+      await Router.route(this, location.pathname, true, pane); // Route to the new path based on the pathname
       this.#beginNavigation(); // Start the navigation (popstate event)
 
       // Load pages in the background to the router cache
@@ -49,7 +49,7 @@ class AccentRouter {
    */
   async #beginNavigation() {
     window.addEventListener("popstate", (event) => {
-      AccentRouter.route(this, window.location.pathname, true);
+      Router.route(this, window.location.pathname, true);
     });
   }
 
@@ -87,7 +87,7 @@ class AccentRouter {
     // Get the routing information
     targetPane =
       targetPane ||
-      document.querySelector(`[${_AccentRouterConfig.ROUTER_PANE_DIRECTIVE}`) ||
+      document.querySelector(`${_AccentRouterConfig.ROUTER_PANE_TAGNAME}`) ||
       document.documentElement; // Get the pane to insert elements onto
     this.defaultPane = targetPane;
     const cache = this.#routerCache
@@ -125,7 +125,7 @@ class AccentRouter {
     const toAppend =
       targetPane == document.documentElement
         ? doc.documentElement
-        : doc.querySelector(`[${_AccentRouterConfig.ROUTER_TARGET_DIRECTIVE}]`);
+        : doc.querySelector(`${_AccentRouterConfig.ROUTER_TARGET_TAGNAME}`);
 
     // If the target cannot be found, then throw an error
     if (!toAppend) { throw _AccentRouterErrors.TARGET_NOT_FOUND(route.name); }
@@ -141,7 +141,7 @@ class AccentRouter {
     // If this route is protected and a required parameter is missing, route to the fallback
     if (prot && (!this.params || !this.params[prot])) {
       if (fallback)
-        return AccentRouter.route(this, fallback)
+        return Router.route(this, fallback)
       else
         throw _AccentRouterErrors.UNPROTECTED_ROUTE(route.name);
     }
@@ -158,10 +158,9 @@ class AccentRouter {
     this.#configureRoutingLinks(); // Detect routing links and add appropriate event listeners
 
     // If the AccentRenderer module is attached, transpile the page again to account for the changes
-    if (typeof AccentRenderer !== "undefined") {
-      AccentRenderer._transpile(targetPane);
+    if (typeof Renderer !== "undefined") { 
+      Renderer.compiler.transpile(targetPane);
     }
-
     return;
   }
 
@@ -203,7 +202,7 @@ class AccentRouter {
   async #fetchPageAsync(route) {
     try {
       const path = this.#formatPath(`${this.routes[route]["src"]}`); // Get the formatted path from the route
-      return await AccentRouter.#fetch(path, "html"); // Return the HTML
+      return await Router.#fetch(path, "html"); // Return the HTML
     } catch {
       throw _AccentRouterErrors.SOURCE_NOT_FOUND(route);
     }
@@ -252,7 +251,7 @@ class AccentRouter {
         // Add the onclick event
         el.onclick = (event) => {
           event.preventDefault();
-          AccentRouter.route(this, href, false, this.defaultPane); // Route on clicked to the destination
+          Router.route(this, href, false, this.defaultPane); // Route on clicked to the destination
         };
       });
   }
@@ -298,20 +297,20 @@ class AccentRouter {
    * @param {...any} args - The arguments for the specific routing operation
    */
   async route(...args) {
-    AccentRouter.route(this, ...args);
+    Router.route(this, ...args);
   }
 
   /**
    *
    * Route pane to a certain destination.
-   * @param {AccentRouter} router - The AccentRouter instance that is being used for the routing operation.
+   * @param {Router} router - The AccentRouter instance that is being used for the routing operation.
    * @param {string} destination - The destination of the routing operation.
    * @param {boolean} root - Is the route to be executed as root (mimic initial routing operation)?
    * @param {HTMLElement} pane - The element inside of which content will be loaded.
    */
   static async route(router, destination, root, pane) {
     document.dispatchEvent(_AccentRouterEvents.ROUTING_STARTED); // Dispatch event for routing started
-    const route = AccentRouter._getRouteFromInput(router, destination); // Get the route from the given input
+    const route = Router._getRouteFromInput(router, destination); // Get the route from the given input
     // Fill the pane with the new page
     await router
       .fillPane(route.destination, root, route.dynamics, pane)
@@ -326,7 +325,7 @@ class AccentRouter {
 
   /**
    * Get the routing information for a specified route.
-   * @param {AccentRouter} router - The router that the operation is executed upon
+   * @param {Router} router - The router that the operation is executed upon
    * @param {(Array|string)} destination - The destination (or "target") route
    * @return {Object} - The final routing data
    */
@@ -365,7 +364,7 @@ class AccentRouter {
               cleanFrags(exec, i);
             }
 
-            let formattedPath = AccentRouter.#formatDynamicRouterPath(path);
+            let formattedPath = Router.#formatDynamicRouterPath(path);
             formattedPath = Array.isArray(formattedPath)
               ? formattedPath.map((p) => p.replace(/\/$/, ""))
               : formattedPath.replace(/\/$/, "");
@@ -401,11 +400,11 @@ class AccentRouter {
 }
 
 /** Global Utility Variables **/
-const $route = AccentRouter.route;
+const $route = Router.route;
 const $link = (router, el, destination) => {
   el.onclick = (e) => {
     e.preventDefault();
-    AccentRouter.route(router, destination);
+    Router.route(router, destination);
   };
 };
 
@@ -416,11 +415,12 @@ const $link = (router, el, destination) => {
 const _AccentRouterConfig = {
   ROUTER_DYNAMIC_LINK: /:(.+?)\//g,
   ROUTER_DYNAMIC_LINK_ISOLATED: /:(.+)/g,
-  ROUTER_PANE_DIRECTIVE: `router-pane`,
-  ROUTER_TARGET_DIRECTIVE: `router-target`,
+  ROUTER_PANE_TAGNAME: `router-pane`,
+  ROUTER_TARGET_TAGNAME: `router-target`,
   ROUTER_LINK_DIRECTIVE: `router-to`,
   ROUTER_PROTECT_DIRECTIVE: `router-protect`,
   ROUTER_FALLBACK_DIRECTIVE: `router-fallback`,
+  EVENT_PREFIX: `router:`,
 };
 
 /**
@@ -428,12 +428,12 @@ const _AccentRouterConfig = {
  * @namespace
  */
 const _AccentRouterEvents = {
-  ROUTES_RECOGNIZED: new Event("router:routes-recognized"),
-  ROUTER_INIT: new Event("router:router-init"),
-  ROUTING_STARTED: new Event("router:routing-started"),
-  ROUTING_ENDED: new Event("router:routing-ended"),
-  ROUTES_LOADED_ASYNC: new Event("router:routes-loaded-async"),
-  ROUTING_FAILED: new Event("router:routing-failed"),
+  ROUTES_RECOGNIZED: new Event(`${_AccentRouterConfig.EVENT_PREFIX}routes-recognized`),
+  ROUTER_INIT: new Event(`${_AccentRouterConfig.EVENT_PREFIX}router-init`),
+  ROUTING_STARTED: new Event(`${_AccentRouterConfig.EVENT_PREFIX}routing-started`),
+  ROUTING_ENDED: new Event(`${_AccentRouterConfig.EVENT_PREFIX}routing-ended`),
+  ROUTES_LOADED_ASYNC: new Event(`${_AccentRouterConfig.EVENT_PREFIX}routes-loaded-async`),
+  ROUTING_FAILED: new Event(`${_AccentRouterConfig.EVENT_PREFIX}routing-failed`),
 };
 
 /**
@@ -474,4 +474,4 @@ const _AccentRouterErrors = {
   }
 }
 
-const $router = (...args) => { return new AccentRouter(...args); } // AccentRouter initialization function
+const $router = (...args) => { return new Router(...args); } // AccentRouter initialization function

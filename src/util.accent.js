@@ -1,9 +1,23 @@
 "use strict";
 
 /**
+ * Public utility object with helper methods and elements
+ */
+ const Util = {
+  /* Dom */
+  doc: document,
+  docEl: document.documentElement,
+  body: document.body,
+  parseHTML: (html) => {
+    const parser = new DOMParser();
+    return parser.parseFromString(html, "text/html");
+  },
+};
+
+/**
  * Accent's internal utility object with global accessor functions
  */
-const AccentUtil = {
+const _AccentUtil = {
   /**
    * Create an AccentNodeList from an HTMLElement or selector
    * @param {(string|HTMLElement|NodeList)} sel - Selector or object to create AccentNodeList from
@@ -239,7 +253,7 @@ class AccentNodeList extends Array {
    */
   append(val) {
     if (!val)
-      return AccentUtil._err(
+      return _AccentUtil._err(
         "accent.js: $el(...).append() was used without any parameters"
       );
     this.set("innerHTML", val, true);
@@ -251,7 +265,7 @@ class AccentNodeList extends Array {
    */
   prepend(val) {
     if (!val)
-      return AccentUtil._err(
+      return _AccentUtil._err(
         "accent.js: $el(...).prepend() was used without any parameters"
       );
     super.forEach.call(this, (e) => {
@@ -476,23 +490,9 @@ class AccentNodeCollection extends AccentNodeList {
   }
 }
 
-/**
- * Public utility object with helper methods and elements
- */
-const Ac = {
-  /* Dom */
-  doc: document,
-  docEl: document.documentElement,
-  body: document.body,
-  parseHTML: (html) => {
-    const parser = new DOMParser();
-    return parser.parseFromString(html, "text/html");
-  },
-};
-
 // DOM
-const $el = AccentUtil._get;
-const $ready = (e) => AccentUtil._onReady(document, e);
+const $el = _AccentUtil._get;
+const $ready = (e) => _AccentUtil._onReady(document, e);
 
 // Objects
 const $obj = AccentUtilObject;
