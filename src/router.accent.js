@@ -2,6 +2,7 @@
 
 /** Class that represents the AccentRouter **/
 class Router {
+  static app = undefined; 
   routes; // The routes that are to be stored
   currentRoute; // The current route of the system
   defaultPane; // The default pane for this router
@@ -16,19 +17,20 @@ class Router {
    * @param {Object} args - The options/arguments for the router
    */
   constructor(routes, args = {}) {
+    if (Router.app) throw Error(_AccentRouterErrors.ROUTER_ALREADY_RUNNING()); 
     const pane = args.pane;
     const async = args.loadPagesAsync;
 
     // Asynchronously execute code to use await in context
     (async () => {
-      // FInd routes
+      // Find routes
       this.routes =
         typeof routes === "object"
           ? routes
           : await Router.#fetch(routes, "json").then((routes) => {
-            document.dispatchEvent(_AccentRouterEvents.ROUTES_RECOGNIZED); // After routes are recognized,
-            return routes; // Return the routes to assign the value
-          });
+              document.dispatchEvent(_AccentRouterEvents.ROUTES_RECOGNIZED); // After routes are recognized,
+              return routes; // Return the routes to assign the value
+            });
       this.defaultPane = pane; // Assign the default pane for this router
       await Router.route(this, location.pathname, true, pane); // Route to the new path based on the pathname
       this.#beginNavigation(); // Start the navigation (popstate event)
@@ -42,6 +44,7 @@ class Router {
 
       document.dispatchEvent(_AccentRouterEvents.ROUTER_INIT);
     })();
+    Router.app = this; 
   }
 
   /**
@@ -69,7 +72,8 @@ class Router {
           name: r,
           html: await this.#fetchPageAsync(r),
         };
-        if (routes.length == i + 1) res(_AccentRouterEvents.ROUTES_LOADED_ASYNC);
+        if (routes.length == i + 1)
+          res(_AccentRouterEvents.ROUTES_LOADED_ASYNC);
       });
     }).then((v) => {
       return v;
@@ -128,7 +132,9 @@ class Router {
         : doc.querySelector(`${_AccentRouterConfig.ROUTER_TARGET_TAGNAME}`);
 
     // If the target cannot be found, then throw an error
-    if (!toAppend) { throw _AccentRouterErrors.TARGET_NOT_FOUND(route.name); }
+    if (!toAppend) {
+      throw _AccentRouterErrors.TARGET_NOT_FOUND(route.name);
+    }
 
     // Configuration for protected routes
     const prot = toAppend.getAttribute(
@@ -140,10 +146,8 @@ class Router {
 
     // If this route is protected and a required parameter is missing, route to the fallback
     if (prot && (!this.params || !this.params[prot])) {
-      if (fallback)
-        return Router.route(this, fallback)
-      else
-        throw _AccentRouterErrors.UNPROTECTED_ROUTE(route.name);
+      if (fallback) return Router.route(this, fallback);
+      else throw _AccentRouterErrors.UNPROTECTED_ROUTE(route.name);
     }
 
     targetPane.append(toAppend);
@@ -158,7 +162,7 @@ class Router {
     this.#configureRoutingLinks(); // Detect routing links and add appropriate event listeners
 
     // If the AccentRenderer module is attached, transpile the page again to account for the changes
-    if (typeof Renderer !== "undefined") { 
+    if (typeof Renderer !== "undefined") {
       Renderer.compiler.transpile(targetPane);
     }
     return;
@@ -230,7 +234,9 @@ class Router {
         }
         if (content) Function(content)();
       } catch (err) {
-        throw _AccentRouterErrors.BASE_ERROR(`${path || this.routes[route]["src"]}: ${err}`);
+        throw _AccentRouterErrors.BASE_ERROR(
+          `${path || this.routes[route]["src"]}: ${err}`
+        );
       }
     });
   }
@@ -349,8 +355,12 @@ class Router {
             let exp;
 
             const cleanFrags = (exec, pathIndex) => {
-              while (exp = _AccentRouterConfig.ROUTER_DYNAMIC_LINK_ISOLATED.exec(exec)) {
-                const index = pathIndex - (destinationFrags.length - frags.length);
+              while (
+                (exp =
+                  _AccentRouterConfig.ROUTER_DYNAMIC_LINK_ISOLATED.exec(exec))
+              ) {
+                const index =
+                  pathIndex - (destinationFrags.length - frags.length);
                 if (frags[index]) dynamics[exp[1]] = decodeURI(frags[index]);
                 frags.splice(index, 1);
               }
@@ -428,12 +438,20 @@ const _AccentRouterConfig = {
  * @namespace
  */
 const _AccentRouterEvents = {
-  ROUTES_RECOGNIZED: new Event(`${_AccentRouterConfig.EVENT_PREFIX}routes-recognized`),
+  ROUTES_RECOGNIZED: new Event(
+    `${_AccentRouterConfig.EVENT_PREFIX}routes-recognized`
+  ),
   ROUTER_INIT: new Event(`${_AccentRouterConfig.EVENT_PREFIX}router-init`),
-  ROUTING_STARTED: new Event(`${_AccentRouterConfig.EVENT_PREFIX}routing-started`),
+  ROUTING_STARTED: new Event(
+    `${_AccentRouterConfig.EVENT_PREFIX}routing-started`
+  ),
   ROUTING_ENDED: new Event(`${_AccentRouterConfig.EVENT_PREFIX}routing-ended`),
-  ROUTES_LOADED_ASYNC: new Event(`${_AccentRouterConfig.EVENT_PREFIX}routes-loaded-async`),
-  ROUTING_FAILED: new Event(`${_AccentRouterConfig.EVENT_PREFIX}routing-failed`),
+  ROUTES_LOADED_ASYNC: new Event(
+    `${_AccentRouterConfig.EVENT_PREFIX}routes-loaded-async`
+  ),
+  ROUTING_FAILED: new Event(
+    `${_AccentRouterConfig.EVENT_PREFIX}routing-failed`
+  ),
 };
 
 /**
@@ -452,26 +470,31 @@ const _AccentRouteLoadTypes = {
 const _AccentRouterErrors = {
   AccentLibraryName: `Accent.js Router`,
   ROUTE_NOT_FOUND: (...params) => {
-    return `${_AccentRouterErrors.AccentLibraryName}: The specified route ('${params[0]}') was not found.`;
+    return `(${_AccentRouterErrors.AccentLibraryName}) The specified route ('${params[0]}') was not found.`;
   },
   TARGET_NOT_FOUND: (...params) => {
-    return `${_AccentRouterErrors.AccentLibraryName}: A router target could not be found for route '${params[0]}'.`;
+    return `(${_AccentRouterErrors.AccentLibraryName}) A router target could not be found for route '${params[0]}'.`;
   },
   UNPROTECTED_ROUTE: (...params) => {
-    return `${_AccentRouterErrors.AccentLibraryName}: The fallback for protected route '${params[0]}' was not found.`;
+    return `(${_AccentRouterErrors.AccentLibraryName}) The fallback for protected route '${params[0]}' was not found.`;
   },
   JSON_PARSE: (...params) => {
-    return `${_AccentRouterErrors.AccentLibraryName}: The provided JSON input could not be parsed from ${params[0]}.`;
+    return `(${_AccentRouterErrors.AccentLibraryName}) The provided JSON input could not be parsed from ${params[0]}.`;
   },
   ROUTE_NOT_DETERMINED: (...params) => {
-    return `${_AccentRouterErrors.AccentLibraryName}: A route could not be determined from the destination '${params[0]}'. Please ensure that the initial routes data and destination are properly formatted.`;
+    return `(${_AccentRouterErrors.AccentLibraryName}) A route could not be determined from the destination '${params[0]}'. Please ensure that the initial routes data and destination are properly formatted.`;
   },
   SOURCE_NOT_FOUND: (...params) => {
-    return `${_AccentRouterErrors.AccentLibraryName}: An error occurred while fetching the source for ${params[0]}.`;
+    return `(${_AccentRouterErrors.AccentLibraryName}) An error occurred while fetching the source for ${params[0]}.`;
+  },
+  ROUTER_ALREADY_RUNNING: (...params) => {
+    return `(${_AccentRouterErrors.AccentLibraryName}) The main router for this app is already running. Use Accent.js Templates for "child" routes`;
   },
   BASE_ERROR: (e) => {
-    return `${_AccentRouterErrors.AccentLibraryName}: ${e}`;
-  }
-}
+    return `(${_AccentRouterErrors.AccentLibraryName}) ${e}`;
+  },
+};
 
-const $router = (...args) => { return new Router(...args); } // AccentRouter initialization function
+const $router = (...args) => {
+  return new Router(...args);
+}; // AccentRouter initialization function

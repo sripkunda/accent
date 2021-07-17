@@ -3,7 +3,7 @@
 /**
  * Public utility object with helper methods and elements
  */
- const Util = {
+const Util = {
   /* Dom */
   doc: document,
   docEl: document.documentElement,
