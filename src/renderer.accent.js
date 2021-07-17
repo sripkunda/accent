@@ -3,7 +3,7 @@
 /* --- Core Components --- */
 
 class RendererChangeDetector {
-  // Listens for changes to the DOM and reloads the necessary AccentComponents. 
+  // Listens for changes to the DOM and reloads the necessary AccentComponents.
   static MutationObserver = new MutationObserver((mutationsList, observer) => {
     if (!Renderer.state.loaded) return;
     for (const mutation of mutationsList) {
@@ -46,7 +46,7 @@ class RendererChangeDetector {
 }
 
 /**
- * Class for Accent's reactive objects. 
+ * Class for Accent's reactive objects.
  */
 class AccentObservable extends Object {
   ObservableSubscribers = [];
@@ -54,7 +54,7 @@ class AccentObservable extends Object {
   /**
    * Initialize a new AccentObservable
    * @param {Object} value - The value to initialize the observable from
-   * @returns 
+   * @returns
    */
   constructor(value) {
     super(value);
@@ -97,7 +97,8 @@ class AccentObservable extends Object {
                 differences: arrayMutation ? getMutation() : [],
               };
 
-          if (!arrayMutation && (target[prop] == value || !diffs.different)) return true; // If there are no changes then return here
+          if (!arrayMutation && (target[prop] == value || !diffs.different))
+            return true; // If there are no changes then return here
 
           target[prop] = value; // Set the value
           // Loop through observers and play the callbacks
@@ -135,18 +136,24 @@ class AccentObservable extends Object {
   }
 
   /**
-   * Clean up element-bound subscribers with not-found element references. 
+   * Clean up element-bound subscribers with not-found element references.
    * @param {Object} subscriber - The subscriber to clean
    * @param {number} subscriberIndex - The index of the subscriber to clean
    */
   $clean(subscriber, subscriberIndex) {
     const snip = (s, i) => {
-      if (s.data?._AccentElement && !document.documentElement.contains(s.data._AccentElement))
-      this.ObservableSubscribers.splice(i ?? this.ObservableSubscribers.indexOf(s), 1);
-    }
+      if (
+        s.data?._AccentElement &&
+        !document.documentElement.contains(s.data._AccentElement)
+      )
+        this.ObservableSubscribers.splice(
+          i ?? this.ObservableSubscribers.indexOf(s),
+          1
+        );
+    };
     const clean = (s, i) => {
       console.log(s.key);
-      if (typeof this[s.key] === 'object') {
+      if (typeof this[s.key] === "object") {
         const subs = this[s.key].ObservableSubscribers;
         if (subs)
           subs.forEach((s, i) => {
@@ -155,11 +162,11 @@ class AccentObservable extends Object {
       } else {
         snip(s, i);
       }
-    }
+    };
     if (!subscriber) {
       this.ObservableSubscribers.forEach((s, i) => {
-        clean(s, i); 
-      })
+        clean(s, i);
+      });
     } else {
       clean(subscriber, subscriberIndex);
     }
@@ -167,13 +174,13 @@ class AccentObservable extends Object {
 
   /**
    * Subscribe to updates on a specific key of an AccentObservable
-   * @param {string} key - The key to subscribe to 
+   * @param {string} key - The key to subscribe to
    * @param {function} instructions - Function to be called whenever a change is observed.
    * @param {*} data - Custom data to be passed to the instructions
    */
   $subscribe(key, instructions, data) {
-    const obj = typeof this[key] === 'object' ? this[key] : this; 
-    obj.ObservableSubscribers = obj.ObservableSubscribers || []; 
+    const obj = typeof this[key] === "object" ? this[key] : this;
+    obj.ObservableSubscribers = obj.ObservableSubscribers || [];
     obj.ObservableSubscribers.push({
       key: key,
       instructions: instructions,
@@ -189,16 +196,12 @@ class AccentObservable extends Object {
    */
   $bind(element, prop, key) {
     const change = () => {
-      typeof element[prop] !== 'undefined'
-          ? element[prop] = this[key]
-          : element.setAttribute(prop, this[key]); // Change the property of the element accordingly
-    }
+      typeof element[prop] !== "undefined"
+        ? (element[prop] = this[key])
+        : element.setAttribute(prop, this[key]); // Change the property of the element accordingly
+    };
     change();
-    this.$subscribe(
-      key,
-      change,
-      { _AccentElement: element }
-    );
+    this.$subscribe(key, change, { _AccentElement: element });
   }
 
   /**
@@ -241,9 +244,9 @@ class AccentContext extends AccentComponent {
   }
 
   /**
-   * Find the local context of an HTMLElement 
-   * @param {HTMLElement} el - Element used as starting point for search. 
-   * @returns 
+   * Find the local context of an HTMLElement
+   * @param {HTMLElement} el - Element used as starting point for search.
+   * @returns
    */
   static find(el) {
     while (el) {
@@ -258,8 +261,8 @@ class AccentContext extends AccentComponent {
 
   /**
    * Get or create a new AccentContext
-   * @param  {...any} args - The arguments to be passed to create or get the context. 
-   * @returns 
+   * @param  {...any} args - The arguments to be passed to create or get the context.
+   * @returns
    */
   static get(...args) {
     return (
@@ -290,7 +293,7 @@ class AccentDirective {
   /**
    * Execute an AccentDirective
    * @param {*} id - The id of the directive
-   * @param  {...any} args - The arguments to pass to the directive's instructions. 
+   * @param  {...any} args - The arguments to pass to the directive's instructions.
    */
   static exec(id, ...args) {
     AccentDirective.directives[id].instructions(...args);
@@ -303,15 +306,20 @@ const _context = (el, data, instructions) => {
 };
 
 const _ref = (el, value) => {
-  const context = AccentContext.find(el); 
-  context.scope[value] = el; 
-}
+  const context = AccentContext.find(el);
+  context.scope[value] = el;
+};
 
 const _bind = (el, observable, attribute) => {
-  attribute = attribute ?? el.getAttribute(`${AccentDirective.helperPrefix}attr`) ?? "innerHTML";
-  const attrs = attribute.split(_AccentRendererConfig.DUAL_SEPARATOR).map(a => a.trim());
+  attribute =
+    attribute ??
+    el.getAttribute(`${AccentDirective.helperPrefix}attr`) ??
+    "innerHTML";
+  const attrs = attribute
+    .split(_AccentRendererConfig.DUAL_SEPARATOR)
+    .map((a) => a.trim());
   const context = AccentContext.find(el);
-  attrs.forEach(a => {
+  attrs.forEach((a) => {
     context.scope.$bind(el, a, observable);
   });
 };
@@ -323,7 +331,8 @@ const _model = (el, observable) => {
 
 // Events
 const _on = (el, value, trigger) => {
-  trigger = trigger || el.getAttribute(`${AccentDirective.helperPrefix}trigger`);
+  trigger =
+    trigger || el.getAttribute(`${AccentDirective.helperPrefix}trigger`);
   el[trigger] = (e) => {
     e.preventDefault();
     Renderer.compiler._executeInContext(value, AccentContext.find(el) ?? {});
@@ -360,12 +369,12 @@ const _for = (el, value, iterator, iterable, template, subscribed) => {
 
   const iterate = async (el, iterator, iterable, template, context, diffs) => {
     const forVariables = {
-      index: '$index',
-      first: '$first',
-      last: '$last', 
-      even: '$even',
-      iterable: '$iterable'
-    }
+      index: "$index",
+      first: "$first",
+      last: "$last",
+      even: "$even",
+      iterable: "$iterable",
+    };
 
     const fillGreedy = () => {
       el.innerHTML = "";
@@ -378,7 +387,7 @@ const _for = (el, value, iterator, iterable, template, subscribed) => {
           [iterator, ...Object.values(forVariables)],
           [value, i, i == 0, i == object.length - 1, i % 2 == 0, object]
         );
-        html.appendChild(append); 
+        html.appendChild(append);
       });
       el.append(html);
     };
@@ -386,26 +395,35 @@ const _for = (el, value, iterator, iterable, template, subscribed) => {
     const fillLazy = () => {
       const nl = el.querySelectorAll(acForContent);
       if (nl.length < 1) return fillGreedy();
-      const addedHTML = document.createDocumentFragment(); 
+      const addedHTML = document.createDocumentFragment();
       diffs.forEach(async (diff) => {
         const length = diff.mutation;
         const index = length ? diff.index - 1 : diff.index;
         const objIndex = length ? index + 1 : index;
         const value = length ? object[index] : diff.value;
         if (typeof value === "undefined") {
-           return nl[objIndex].remove();
+          return nl[objIndex].remove();
         }
         const content = Renderer.compiler._resolveInterpolation(
           template,
           AccentContext.find(el),
           [iterator, ...Object.values(forVariables)],
-          [value, index, index == 0, index == object.length - 1, index % 2 == 0, object]
+          [
+            value,
+            index,
+            index == 0,
+            index == object.length - 1,
+            index % 2 == 0,
+            object,
+          ]
         );
-        nl[objIndex] ? (nl[objIndex].innerHTML = content) : (() => {
-          const append = document.createElement(acForContent);
-          append.innerHTML = content; 
-          addedHTML.appendChild(append);
-        })();
+        nl[objIndex]
+          ? (nl[objIndex].innerHTML = content)
+          : (() => {
+              const append = document.createElement(acForContent);
+              append.innerHTML = content;
+              addedHTML.appendChild(append);
+            })();
       });
       el.append(addedHTML);
     };
@@ -428,9 +446,13 @@ const _for = (el, value, iterator, iterable, template, subscribed) => {
       iterate(el, iterator, iterable, template, context, args[args.length - 1]);
     };
 
-    const data = { _AccentElement: el }; 
+    const data = { _AccentElement: el };
     context.scope.$subscribe("length", handler, data);
-    context.scope.$subscribe(iterable.replaceAll(/this\.?/g, ""), handler, data);
+    context.scope.$subscribe(
+      iterable.replaceAll(/this\.?/g, ""),
+      handler,
+      data
+    );
   }
 };
 
@@ -450,7 +472,7 @@ const _AccentRendererConfig = {
   EVENT_PREFIX: `renderer:`,
   INTERPOLATION_TAG: `${AccentDirective.prefix.replace(/-/g, "")}`,
   DUAL_SEPARATOR: ",",
-  CHILD_PARENT_SEPARATOR: ":"
+  CHILD_PARENT_SEPARATOR: ":",
 };
 
 /**
@@ -549,7 +571,7 @@ const Renderer = {
       })
         .then(async () => {
           this._resolveInterpolation(element);
-          this.clean(AccentContext.contexts, "element"); 
+          this.clean(AccentContext.contexts, "element");
           return true;
         })
         .catch((e) => {
@@ -557,7 +579,7 @@ const Renderer = {
         });
     },
     clean(map, elementProp) {
-      map.forEach(item => {
+      map.forEach((item) => {
         if (!document.documentElement.contains(item[elementProp]))
           map.delete(item);
       });
@@ -570,7 +592,7 @@ const Renderer = {
       content
         .querySelectorAll(_AccentRendererConfig.INTERPOLATION_TAG)
         .forEach((el) => {
-          const template = el.innerHTML; 
+          const template = el.innerHTML;
           const set = (sub, dat) => {
             context = context || AccentContext.find(el);
             const compiledContent = Renderer.compiler._executeInContext(
@@ -580,12 +602,17 @@ const Renderer = {
               argumentValues
             );
             el.innerHTML = compiledContent ?? "";
-          }
+          };
           set();
-          const subscription = el.getAttribute(`${AccentDirective.helperPrefix}subscribe`)?.split(_AccentRendererConfig.DUAL_SEPARATOR).map(e => e.trim()); 
+          const subscription = el
+            .getAttribute(`${AccentDirective.helperPrefix}subscribe`)
+            ?.split(_AccentRendererConfig.DUAL_SEPARATOR)
+            .map((e) => e.trim());
           if (subscription) {
-            subscription.forEach(s => {
-              const key = s.split(_AccentRendererConfig.CHILD_PARENT_SEPARATOR)[1];
+            subscription.forEach((s) => {
+              const key = s.split(
+                _AccentRendererConfig.CHILD_PARENT_SEPARATOR
+              )[1];
               context.scope.$subscribe(key ?? s, set, { _AccentElement: el });
             });
           }
@@ -607,7 +634,7 @@ const Renderer = {
       // ¯\_(ツ)_/¯
       const objectInScope = exp.replace(/this\.?/g, "");
       return context && context.scope[objectInScope];
-    }
+    },
   },
   state: {
     loaded: false,
@@ -619,4 +646,4 @@ const Renderer = {
   },
 };
 
-Renderer.compiler.render();
+Renderer.compiler.render(); // Render page

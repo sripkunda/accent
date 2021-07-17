@@ -27,7 +27,7 @@ class AccentAnimation {
    * Apply an animation to a specific element
    * @param {(string|HTMLElement)} selector - The selector of the element to apply the animation to
    * @param {function} callback - The function to be called after the animation is applied
-   * @returns {AccentAnimation} - This AccentAnimation instance
+   * @return {AccentAnimation} - This AccentAnimation instance
    */
   apply(selector, callback) {
     selector = AccentAnimation.#getObjectFromSelector(selector);
@@ -54,9 +54,9 @@ class AccentAnimation {
    */
   state(state, callback) {
     if (state == _AccentAnimationConfig.TOGGLE_IDENTIFIER) {
-      const st = Object.keys(this.states); 
-      state = st.indexOf(this.currentState) > 0 ? st[0] : st[1]; 
-    } 
+      const st = Object.keys(this.states);
+      state = st.indexOf(this.currentState) > 0 ? st[0] : st[1];
+    }
     this.#updateState(state, null, callback);
   }
 
@@ -80,13 +80,14 @@ class AccentAnimation {
    * Execute an AccentAnimation
    * @param {function} callback - The callback that is to be executed after the animation
    * @param {HTMLElement} el - The element to update (updates all bound elements if left blank)
-   * @returns {*} - The return value of the callback or the AccentAnimation instance
+   * @return {*} - The return value of the callback or the AccentAnimation instance
    */
   #animate(callback, el) {
     const state = this.currentState;
     const update = (el) => {
       const props = this.states[state];
-      if (!props) throw new Error(_AccentAnimationErrors.STATE_NOT_FOUND(state));
+      if (!props)
+        throw new Error(_AccentAnimationErrors.STATE_NOT_FOUND(state));
       Object.keys(props).forEach((prop) => {
         el.style[prop] = props[prop];
       });
@@ -101,7 +102,7 @@ class AccentAnimation {
    * @param {(string|HTMLElement)} selector - The element (or element selector) of the element to apply the animation to.
    * @param {number} speed - The speed of the fade animation
    * @param {function} callback - The function to be executed (once) after the animation is applied.
-   * @returns {AccentAnimation} - The AccentAnimation that was created
+   * @return {AccentAnimation} - The AccentAnimation that was created
    */
   static fade(fadeState, selector, speed, callback) {
     return new AccentAnimation(
@@ -121,7 +122,7 @@ class AccentAnimation {
   /**
    * Find an element in the HMTL
    * @param {(string|HTMLElement)} selector - The selector that is used to search the DOM .
-   * @returns {Object} - The element object that is found from the selector
+   * @return {Object} - The element object that is found from the selector
    */
   static #getObjectFromSelector(selector) {
     return typeof selector === "object"
@@ -159,5 +160,5 @@ const _AccentAnimationErrors = {
  * Configuration for AccentAnimation library
  */
 const _AccentAnimationConfig = {
-  TOGGLE_IDENTIFIER: `$toggle`
+  TOGGLE_IDENTIFIER: `$toggle`,
 };

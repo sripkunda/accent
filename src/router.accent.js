@@ -2,7 +2,7 @@
 
 /** Class that represents the AccentRouter **/
 class Router {
-  static app = undefined; 
+  static app = undefined;
   routes; // The routes that are to be stored
   currentRoute; // The current route of the system
   defaultPane; // The default pane for this router
@@ -17,7 +17,7 @@ class Router {
    * @param {Object} args - The options/arguments for the router
    */
   constructor(routes, args = {}) {
-    if (Router.app) throw Error(_AccentRouterErrors.ROUTER_ALREADY_RUNNING()); 
+    if (Router.app) throw Error(_AccentRouterErrors.ROUTER_ALREADY_RUNNING());
     const pane = args.pane;
     const async = args.loadPagesAsync;
 
@@ -44,7 +44,7 @@ class Router {
 
       document.dispatchEvent(_AccentRouterEvents.ROUTER_INIT);
     })();
-    Router.app = this; 
+    Router.app = this;
   }
 
   /**
