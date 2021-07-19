@@ -5,7 +5,6 @@
  */
 class AccentAnimation {
   #elements = new Map(); // The elements that the animation is applied to
-  #speed; // The execution speed for the animation
   states; // The states of the animation
   currentState; // The current state of the animation
 
@@ -13,13 +12,11 @@ class AccentAnimation {
    * Create a new AccentAnimation
    * @param {string} state - The starting state of the animation
    * @param {Object} states - The states of the animation
-   * @param {number} speed - The speed in seconds of the animation
    */
-  constructor(state, states, speed) {
+  constructor(state, states) {
     if (!(typeof states === "object" && states[state]))
       throw Error(_AccentAnimationErrors.STATE_NOT_FOUND());
     this.states = states; // Set the states of the animation
-    this.#speed = speed; // Set the speed of the animation
     this.currentState = state; // Set the current state
   }
 
@@ -33,18 +30,8 @@ class AccentAnimation {
     selector = AccentAnimation.#getObjectFromSelector(selector);
     if (!selector)
       throw new Error(_AccentAnimationErrors.ELEMENT_NOT_FOUND(selector));
-    selector.style.transition = `all ${this.#speed}s`;
     this.#updateState(this.currentState, selector, callback);
     return this;
-  }
-
-  /**
-   * Set a new speed for the animation
-   * @param {number} speed - The new speed to be set in seconds
-   */
-  setSpeed(speed) {
-    this.speed = speed;
-    this.#elements.forEach((e) => (e.style.transition = `all ${speed}s`));
   }
 
   /**
@@ -57,7 +44,7 @@ class AccentAnimation {
       const st = Object.keys(this.states);
       state = st.indexOf(this.currentState) > 0 ? st[0] : st[1];
     }
-    this.#updateState(state, null, callback);
+    return this.#updateState(state, null, callback);
   }
 
   /**
@@ -97,29 +84,6 @@ class AccentAnimation {
   }
 
   /**
-   * Create a fade animation
-   * @param {*} fadeState - Start at faded "in" or "out"
-   * @param {(string|HTMLElement)} selector - The element (or element selector) of the element to apply the animation to.
-   * @param {number} speed - The speed of the fade animation
-   * @param {function} callback - The function to be executed (once) after the animation is applied.
-   * @return {AccentAnimation} - The AccentAnimation that was created
-   */
-  static fade(fadeState, selector, speed, callback) {
-    return new AccentAnimation(
-      fadeState,
-      {
-        out: {
-          opacity: 0,
-        },
-        in: {
-          opacity: 1,
-        },
-      },
-      speed
-    ).apply(selector, callback);
-  }
-
-  /**
    * Find an element in the HMTL
    * @param {(string|HTMLElement)} selector - The selector that is used to search the DOM .
    * @return {Object} - The element object that is found from the selector
@@ -137,8 +101,7 @@ class AccentAnimation {
  * @param  {...any} args - AccentAnimation initialization arguments
  */
 const $anim = (selector, ...args) => {
-  const anim = new AccentAnimation(...args);
-  anim.apply(selector).state(anim.currentState);
+  return new AccentAnimation(...args).apply(selector);
 };
 
 const $fade = AccentAnimation.fade; // Create a fade in/out animation using preset states.

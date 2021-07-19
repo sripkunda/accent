@@ -91,8 +91,7 @@ class Router {
     // Get the routing information
     targetPane =
       targetPane ||
-      document.querySelector(`${_AccentRouterConfig.ROUTER_PANE_TAGNAME}`) ||
-      document.documentElement; // Get the pane to insert elements onto
+      document.querySelector(`${_AccentRouterConfig.ROUTER_PANE_TAGNAME}`);
     this.defaultPane = targetPane;
     const cache = this.#routerCache
       ? this.#routerCache[destination]
@@ -127,9 +126,8 @@ class Router {
 
     // Find the content to append on the document
     const toAppend =
-      targetPane == document.documentElement
-        ? doc.documentElement
-        : doc.querySelector(`${_AccentRouterConfig.ROUTER_TARGET_TAGNAME}`);
+      doc.querySelector(`${_AccentRouterConfig.ROUTER_TARGET_TAGNAME}`) ||
+      doc.body;
 
     // If the target cannot be found, then throw an error
     if (!toAppend) {
@@ -145,12 +143,24 @@ class Router {
     );
 
     // If this route is protected and a required parameter is missing, route to the fallback
-    if (prot && (!this.params || !this.params[prot])) {
+    if (
+      prot &&
+      !(
+        (typeof Renderer !== "undefined" &&
+          Renderer.compiler._executeInContext(
+            `return ${prot}`,
+            AccentContext.find(targetPane),
+            ["$params"],
+            [this.params]
+          )) ||
+        Function("$params", `return ${prot}`)(this.params)
+      )
+    ) {
       if (fallback) return Router.route(this, fallback);
       else throw _AccentRouterErrors.UNPROTECTED_ROUTE(route.name);
     }
 
-    targetPane.append(toAppend);
+    targetPane.innerHTML = toAppend.innerHTML;
 
     // Execute javascript, load css, configure routing links
     doc
@@ -232,7 +242,7 @@ class Router {
         } else {
           content = el.innerHTML;
         }
-        if (content) Function(content)();
+        if (content) (0, eval)(content);
       } catch (err) {
         throw _AccentRouterErrors.BASE_ERROR(
           `${path || this.routes[route]["src"]}: ${err}`
