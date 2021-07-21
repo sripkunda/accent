@@ -1,3 +1,7 @@
+/**
+ * Accent Animations: Manage states and create reactive CSS
+ */
+
 "use strict";
 
 /**

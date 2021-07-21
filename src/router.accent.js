@@ -1,3 +1,7 @@
+/**
+ * Accent Router: A fully-functional client-side routing mechanism for Accent.js
+ */
+
 "use strict";
 
 /** Class that represents the AccentRouter **/
@@ -41,7 +45,6 @@ class Router {
           document.dispatchEvent(v); // Dispatch the event for caching all of the pages asynchronously
         });
       }
-
       document.dispatchEvent(_AccentRouterEvents.ROUTER_INIT);
     })();
     Router.app = this;
@@ -175,6 +178,7 @@ class Router {
     if (typeof Renderer !== "undefined") {
       Renderer.compiler.transpile(targetPane);
     }
+
     return;
   }
 

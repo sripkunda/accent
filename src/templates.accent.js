@@ -1,3 +1,10 @@
+/**
+ * Accent Templates: Create and reuse HTML code with reactive template-specific scopes.
+ */
+
+"use strict";
+
+/* The class that controls and houses AccentTemplates. */
 class AccentTemplate {
   static templates = new Map();
   id;
@@ -10,6 +17,10 @@ class AccentTemplate {
     AccentTemplate.templates.set(id, this);
   }
 
+  /**
+   * Compile a certain node in accordance with the template value
+   * @param {HTMLElement} node - The node to compile
+   */
   compile(node) {
     const fill = (instance) => {
       instance.innerHTML = this.template;
