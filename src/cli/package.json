@@ -1,0 +1,35 @@
+{
+  "name": "@accent/cli",
+  "version": "1.0.0",
+  "description": "The official CLI for Accent.js",
+  "main": "./bin/index.js",
+  "scripts": {
+    "serve": "node ."
+  },
+  "bin": {
+    "ac": "./bin/index.js",
+    "accent": "./bin/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sripkunda/accent.js.git"
+  },
+  "keywords": [
+    "Accent.js"
+  ],
+  "author": "Sri Pranav Kunda",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/sripkunda/accent.js/issues"
+  },
+  "homepage": "https://github.com/sripkunda/accent.js#readme",
+  "dependencies": {
+    "boxen": "^5.0.1",
+    "server": "^1.0.34",
+    "yargs": "^17.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^16.4.1",
+    "@types/yargs": "^17.0.2"
+  }
+}

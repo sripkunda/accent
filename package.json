@@ -1,9 +1,8 @@
 {
-  "name": "accent.js",
+  "name": "@accent/core",
   "version": "1.0.0",
   "description": "A modern, modular, and lightweight JavaScript library built for speed.",
   "main": "index.js",
-  "dependencies": {},
   "devDependencies": {
     "babel-eslint": "^10.1.0",
     "eslint": "^7.30.0",
