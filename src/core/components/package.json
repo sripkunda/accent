@@ -1,0 +1,23 @@
+{
+  "name": "@accent/components",
+  "version": "1.0.0",
+  "description": "Official compartmentalization system for Accent.js",
+  "main": "components.accent.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sripkunda/accent.js.git"
+  },
+  "keywords": [
+    "Accent.js",
+    "accent"
+  ],
+  "author": "Sri Pranav Kunda",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/sripkunda/accent.js/issues"
+  },
+  "homepage": "https://github.com/sripkunda/accent.js#readme"
+}

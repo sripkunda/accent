@@ -108,8 +108,6 @@ const $anim = (selector, ...args) => {
   return new AccentAnimation(...args).apply(selector);
 };
 
-const $fade = AccentAnimation.fade; // Create a fade in/out animation using preset states.
-
 /**
  * Potential errors for the AccentAnimation library
  */

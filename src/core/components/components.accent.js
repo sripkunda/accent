@@ -1,51 +1,55 @@
 /**
- * Accent Templates: Create and reuse HTML code with reactive template-specific scopes.
+ * Accent Components: Create and reuse HTML code with compartmentalization.
  */
 
 "use strict";
 
 /* The class that controls and houses AccentTemplates. */
-class AccentTemplate {
-  static templates = new Map();
+class AccentComponent {
+  static components = new Map();
   id;
   template;
 
   constructor(id, temp) {
     this.id = id;
     this.template = temp;
-    this.compile();
-    AccentTemplate.templates.set(id, this);
+    this.$compile();
+    AccentComponent.components.set(id, this);
   }
 
   /**
    * Compile a certain node in accordance with the template value
    * @param {HTMLElement} node - The node to compile
    */
-  compile(node) {
+  async $compile(node, data) {
     const fill = (instance) => {
       instance.innerHTML = this.template;
       // If there is an AccentContext, fill the data points.
-      const data = instance.getAttribute(
-        `${_AccentTemplatesConfig.HELPER_ATTRIBUTE_PREFIX}data`
-      );
-      if (typeof Renderer !== "undefined" && data) {
-        _context(instance, data);
+      const dat = data || instance.getAttribute(`data`);
+      if (typeof Renderer !== "undefined" && dat) {
+        AccentContext.contexts.has(instance) && data ? (() => {
+          const scope = AccentContext.contexts.get(instance).scope; 
+          Object.keys(data).forEach((key) => {
+            const val = data[key];
+            scope[key] = val;
+          });
+        })() : _context(instance, dat); 
+        Renderer.compiler.transpile(instance);
       }
     };
     if (node) return fill(node);
-
     const template = document.getElementsByTagName(this.id);
     for (const instance of template[Symbol.iterator]()) fill(instance);
   }
 }
 
-const Templates = {
+const Components = {
   compiler: {
     render() {
       document.addEventListener(
         `${_AccentTemplatesConfig.EVENT_PREFIX}dom-ready`,
         () => {
-          Templates.setState("loaded", true);
+          Components.setState("loaded", true);
         }
       );
       this.transpile(document.documentElement).then(async () => {
@@ -58,11 +62,21 @@ const Templates = {
         [Symbol.iterator]()) {
         template.style.display = "none";
         const id = template.getAttribute(
-          `${_AccentTemplatesConfig.HELPER_ATTRIBUTE_PREFIX}id`
+          `ref`
         );
         if (!id) throw Error(_AccentTemplatesErrors.UNIDENTIFIED_TEMPLATE());
-        AccentTemplate.templates.get(id)?.compile() ??
-          new AccentTemplate(id, template.innerHTML);
+        const content = await (async () => {
+          const src = template.getAttribute("src");
+          if (!src)
+            return;
+          return await fetch(`//${window.location.host.replace(/\/$/, "")}/${src}`).then(async (res) => {
+            const html = await res.text();
+            const content = new DOMParser().parseFromString(html, 'text/html');
+            const template = content.querySelector(_AccentTemplatesConfig.TEMPLATE_TAGNAME);
+            return template ? template.innerHTML : (content.body ? content.body.innerHTML : html);
+          });
+        })() ?? template.innerHTML; 
+        AccentComponent.components.get(id)?.compile() ?? new AccentComponent(id, content);
       }
     },
   },
@@ -70,17 +84,17 @@ const Templates = {
     loaded: false,
   },
   setState: (state, value) => {
-    Templates.state[state] = value;
+    Components.state[state] = value;
   },
 };
 
 /* --- Data and Configuration --- */
 
 const _AccentTemplatesConfig = {
-  EVENT_PREFIX: `templates:`,
+  EVENT_PREFIX: `components:`,
   HELPER_ATTRIBUTE_PREFIX:
     typeof Renderer === "undefined" ? `@` : AccentDirective.helperPrefix,
-  TEMPLATE_TAGNAME: "template",
+  TEMPLATE_TAGNAME: "component",
 };
 
 /**
@@ -103,18 +117,18 @@ const _AccentTemplatesErrors = {
   },
 };
 
-Templates.compiler.render();
+Components.compiler.render();
 
 if (typeof Renderer === "undefined") {
-  TemplateChangeDetector = new MutationObserver((mutationsList, observer) => {
+  ComponentChangeDetector = new MutationObserver((mutationsList, observer) => {
     for (const mutation of mutationsList) {
       if (mutation.type === "childList") {
         mutation.addedNodes.forEach((node) => {
           let n = node;
           while (n) {
             const tagName = n.tagName?.toLowerCase();
-            if (AccentTemplate.templates.has(tagName)) {
-              AccentTemplate.templates.get(tagName).compile();
+            if (AccentComponent.components.has(tagName)) {
+              AccentComponent.components.get(tagName).compile();
             }
             n = n.firstElementChild;
           }
@@ -123,3 +137,5 @@ if (typeof Renderer === "undefined") {
     }
   }).observe(document, { attributes: false, childList: true, subtree: true });
 }
+
+const $component = (...args) => { new AccentComponent(...args); }; 

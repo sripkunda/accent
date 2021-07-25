@@ -9,6 +9,7 @@ class Router {
   static app = undefined;
   routes; // The routes that are to be stored
   currentRoute; // The current route of the system
+  currentPath; // The current path of the system
   defaultPane; // The default pane for this router
   #routerCache = {}; // The cached pages that the router loads
 
@@ -32,9 +33,9 @@ class Router {
         typeof routes === "object"
           ? routes
           : await Router.#fetch(routes, "json").then((routes) => {
-              document.dispatchEvent(_AccentRouterEvents.ROUTES_RECOGNIZED); // After routes are recognized,
-              return routes; // Return the routes to assign the value
-            });
+            document.dispatchEvent(_AccentRouterEvents.ROUTES_RECOGNIZED); // After routes are recognized,
+            return routes; // Return the routes to assign the value
+          });
       this.defaultPane = pane; // Assign the default pane for this router
       await Router.route(this, location.pathname, true, pane); // Route to the new path based on the pathname
       this.#beginNavigation(); // Start the navigation (popstate event)
@@ -90,18 +91,27 @@ class Router {
    * @param  {Object} parameters
    * @param  {HTMLElement} targetPane
    */
-  async fillPane(destination, isRoot, parameters, targetPane) {
+  async fillPane(destination, isRoot, parameters, targetPane, childPane) {
     // Get the routing information
-    targetPane =
-      targetPane ||
-      document.querySelector(`${_AccentRouterConfig.ROUTER_PANE_TAGNAME}`);
-    this.defaultPane = targetPane;
+    targetPane = targetPane || document.querySelector(`${_AccentRouterConfig.ROUTER_PANE_TAGNAME}`);
+    if (!targetPane) throw Error(_AccentRouterErrors.TARGET_NOT_FOUND(destination));
+    if (!childPane) this.defaultPane = targetPane;
+
     const cache = this.#routerCache
       ? this.#routerCache[destination]
       : undefined; // Get document data from routerCache
-    const route = cache?.html
-      ? cache
-      : await this.#fetchPage(destination ?? this.routes); // Get the page data for the destination
+
+    if (childPane) {
+      const route = Router._getRouteFromInput(this, `${this.currentPath}${destination}`);
+      if (this.currentPath != route.destination) await Router.route(this, route.destination, false);
+      this.params = route.dynamics;
+      return window.history.pushState({ content: "", title: document.title }, document.title, `${this.currentPath}${destination}`);
+    }
+
+    const route = await (async () => {
+      return cache?.html ? cache : await this.#fetchPage(destination ?? this.routes);
+    })();
+
     const doc = new DOMParser().parseFromString(route.html, "text/html"); // Parse the document data as HTML
 
     // Get the final path that needs to be pushed to the history
@@ -113,6 +123,8 @@ class Router {
     path = path.replace(_AccentRouterConfig.ROUTER_DYNAMIC_LINK, (_a, b) => {
       return `${parameters ? (parameters[b] ? `${parameters[b]}/` : "") : ""}`;
     });
+
+    this.currentPath = path;
 
     this.params = parameters || {}; // Set the routing parameters for this route.
 
@@ -172,14 +184,12 @@ class Router {
     this.currentRoute = route.name; // Change the current route for developers to use
     this.#executeScripts(doc, route.name); // Execute javascript on the doc before adding it to the pane (make sure that external script tags are captured)
     this.#executeScripts(targetPane, route.name); // Execute javascript on the pane
-    this.#configureRoutingLinks(); // Detect routing links and add appropriate event listeners
+    this.configureRoutingLinks(); // Detect routing links and add appropriate event listeners
 
     // If the AccentRenderer module is attached, transpile the page again to account for the changes
     if (typeof Renderer !== "undefined") {
-      Renderer.compiler.transpile(targetPane);
+      Renderer.compiler.transpile(targetPane)
     }
-
-    return;
   }
 
   /**
@@ -258,7 +268,7 @@ class Router {
   /**
    * Adds onclick events to links identified as routerLinks
    */
-  #configureRoutingLinks() {
+  configureRoutingLinks(handler) {
     // Loop through the router links using the router link directive
     document
       .querySelectorAll(`[${_AccentRouterConfig.ROUTER_LINK_DIRECTIVE}]`)
@@ -267,12 +277,15 @@ class Router {
           `${_AccentRouterConfig.ROUTER_LINK_DIRECTIVE}`
         ); // Get the destination
         if (!href) return; // Exit if the href does not exist
-
+        if (el["__route__"]) return;
         // Add the onclick event
-        el.onclick = (event) => {
+        el.onclick = handler ? ((event) => {
+          handler(event, href);
+        }) : ((event) => {
           event.preventDefault();
           Router.route(this, href, false, this.defaultPane); // Route on clicked to the destination
-        };
+        });
+        el["__route__"] = true;
       });
   }
 
@@ -282,7 +295,7 @@ class Router {
    * @return {string} - The formatted path
    */
   #formatPath(path) {
-    return `//${window.location.host.replace(/\/$/, "")}/${path}`;
+    return `//${window.location.host.replace(/\/$/, "")}/${path}`.replace(/\/?$/, '');
   }
 
   /**
@@ -328,7 +341,7 @@ class Router {
    * @param {boolean} root - Is the route to be executed as root (mimic initial routing operation)?
    * @param {HTMLElement} pane - The element inside of which content will be loaded.
    */
-  static async route(router, destination, root, pane) {
+  static async route(router, destination, root, pane = this.defaultPane) {
     document.dispatchEvent(_AccentRouterEvents.ROUTING_STARTED); // Dispatch event for routing started
     const route = Router._getRouteFromInput(router, destination); // Get the route from the given input
     // Fill the pane with the new page

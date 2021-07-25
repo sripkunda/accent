@@ -12,15 +12,10 @@ function serve(cwp, port = 5000, root = 'index.html') {
     root = path.join(cwp, root);
     server({ view: 'view', port: port }, [
         get('/', ctx => render(root)),
-        get('/*.*', ctx => {
-            const fp = path.join(cwp, ctx.url); 
-            return file(fp);
-        }),
-        get('/*.html', ctx => {
-            return render(path.join(cwp, ctx.url));
-        }),
+        get('/*.*', ctx => { return file(path.join(cwp, ctx.url)); }),
+        get('/*.html', ctx => { return render(path.join(cwp, ctx.url)); }),
         get(ctx => render(root)),
-        error(err => { console.info(err); })
+        error(err => render(root))
     ]).then(() => {
         console.info(boxen(`\x1b[36mStarted server at http://localhost:${port}\x1b[0m`, { padding: 1, borderStyle: 'double' } ));
     });

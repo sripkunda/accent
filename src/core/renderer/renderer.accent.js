@@ -131,7 +131,7 @@ class AccentObservable extends Object {
 }
 
 // Defines the structure for a built-in Accent module. 
-class AccentUnit {
+class _AccentUnit {
   template;
   id;
   scope = new AccentObservable({});
@@ -149,8 +149,8 @@ class AccentUnit {
   }
 }
 
-// The AccentComponent that represents a context group
-class AccentContext extends AccentUnit {
+// The AccentUnit that represents a context group
+class AccentContext extends _AccentUnit {
   static contexts = new Map();
 
   constructor(element, scope, id, template, instructions) {
@@ -223,7 +223,7 @@ class AccentDirective {
 }
 
 // A "replica" of an AccentContext, but differentiated for use as an iteration group
-class AccentIterator extends AccentUnit {
+class AccentIterator extends _AccentUnit {
   static childNodeSelector = `${AccentDirective.prefix}for-child`;
   static iterators = new Map();
 
@@ -264,7 +264,7 @@ class AccentIterator extends AccentUnit {
 const _context = (el, data, instructions) => {
   if (AccentContext.contexts.has(el)) return;
   const objectify = (o) => {
-    return typeof o === "string" ? Function(`return ${o}`)() : o;
+    return typeof o === "string" ? Renderer.compiler._executeInContext(`return ${o}`, AccentContext.find(el), [], [], el) : o; 
   };
   const extend = el.getAttribute(`${AccentDirective.helperPrefix}extends`);
   const extendContext = AccentContext.find(extend);
@@ -449,7 +449,7 @@ const _for = (el, value, iterator, iterable, template, indexVar = "index") => {
     };
 
     const object = evalFunc.call(context?.scope ?? {});
-
+    
     const iterableObject = Array.isArray(object)
       ? object
       : typeof object === "object"
@@ -486,9 +486,8 @@ const _for = (el, value, iterator, iterable, template, indexVar = "index") => {
 /* --- Access Variables --- */
 
 const $new = (Obj, ...args) => { return new Obj(...args); };
-const $component = (...args) => $new(AccentComponent, ...args);
 const $context = AccentContext.get;
-const $unit = (...args) => $new(AccentUnit, ...args);
+const $ctx = $context;
 const $directive = (...args) => $new(AccentDirective, ...args);
 const $observable = (...args) => $new(AccentObservable, ...args);
 
@@ -595,7 +594,8 @@ const Renderer = {
               `return ${template}`,
               context,
               argumentNames,
-              argumentValues
+              argumentValues,
+              scopeElement
             );
             el.innerHTML = compiledContent ?? "";
           };
@@ -637,7 +637,6 @@ const Renderer = {
       if (forGroup) {
         argumentNames.push(...Object.keys(forGroup));
         argumentValues.push(...Object.values(forGroup));
-        console.log(argumentNames, argumentValues, expression);
       }
       return Function(...argumentNames, expression).call(
         context?.scope,
@@ -666,7 +665,7 @@ window.addEventListener("load", () => {
 
 // Detects and renders changes in the DOM automatically
 class RendererChangeDetector {
-  // Listens for changes to the DOM and reloads the necessary AccentComponents.
+  // Listens for changes to the DOM and reloads the necessary AccentUnits.
   static MutationObserver = new MutationObserver((mutationsList, observer) => {
     const transpile = (node, directive) => {
       AccentDirective.exec(
@@ -692,10 +691,10 @@ class RendererChangeDetector {
 
             const tagName = n.tagName?.toLowerCase();
             if (
-              typeof Templates !== "undefined" &&
-              AccentTemplate.templates.has(tagName)
+              typeof Components !== "undefined" &&
+              AccentComponent.components.has(tagName)
             ) {
-              AccentTemplate.templates.get(tagName).compile();
+              AccentComponent.components.get(tagName).$compile();
             }
 
             if (dupes.length > 0) {
