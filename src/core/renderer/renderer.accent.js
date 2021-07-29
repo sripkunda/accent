@@ -504,8 +504,9 @@ const _for = (el, value, iterator, iterable, template, indexVar = "index") => {
       : Array.from(object);
 
     fillLazy();
-
     previousObjectSnapshot = Object.assign([], iterableObject);
+    Renderer.compiler.transpile(el);
+
   };
 
   const context = AccentContext.find(el);
