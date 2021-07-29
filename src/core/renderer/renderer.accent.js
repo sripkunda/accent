@@ -613,9 +613,7 @@ const Renderer = {
             [],
             [],
             undefined,
-            (el) => {
-              !AccentIterator._findInScope(el); // Ignore iterable units
-            }
+            (el) => !AccentIterator._findInScope(el)  // Ignore iterable units
           );
           this.clean(AccentContext.contexts, "element");
           return true;

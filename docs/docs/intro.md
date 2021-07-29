@@ -2,34 +2,41 @@
 sidebar_position: 1
 ---
 
-# Tutorial Intro
+# Introduction
 
-Let's discover **Docusaurus in less than 5 minutes**.
+Let's get started with Accent.js in **less than two minutes.**
 
-## Getting Started
+## What is Accent?
 
-Get started by **creating a new site**.
+Accent.js is a lightweight, easy-to-use, and **fully modular** web development framework built for simplicity. All Accent libraries (also called "modules") are standalone and can be 
+used by themselves whenever necessary. 
 
-Or **try Docusaurus immediately** with **[new.docusaurus.io](https://new.docusaurus.io)**.
+When modules are used together, they work together to provide a full toolset for building your web application. Accent is your toolbox, and you choose the best tool(s) for the job. Accent currently is made up of **4 independent libraries.**
 
-## Generate a new site
+## Installation
 
-Generate a new Docusaurus site using the **classic template**:
+Accent.js can be installed through a CDN or through NPM. Build tools are not required to use Accent.js, although the official CLI is recommended when using the Accent.js Router.
 
-```shell
-npx @docusaurus/init@latest init my-website classic
-```
-
-## Start your site
-
-Run the development server:
+#### NPM Installation
 
 ```shell
-cd my-website
-
-npx docusaurus start
+npm install @accent/library-name
 ```
 
-Your site starts at `http://localhost:3000`.
+#### CDN
 
-Open `docs/intro.md` and edit some lines: the site **reloads automatically** and display your changes.
+```html
+<script src="https://unpkg.com/@accent/library-name"></script>
+```
+
+Replace **library-name** with the name of the library you wish to install. A full list of Accent.js libraries can be found [here](libraries).
+
+## Resources and Contributing
+
+Looking for documentation? Look [here](https://accent.js.org).
+
+Report issues at our [issue tracker on GitHub](https://github.com/sripkunda/accent.js/issues). We will get to it as soon as possible. 
+
+For additional help, head over to the [discussions page](https://github.com/sripkunda/accent.js/discussions).
+
+#### [Contribute ➜](https://github.com/sripkunda/accent.js/issues)
