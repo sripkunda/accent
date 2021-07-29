@@ -30,10 +30,10 @@ class AccentObservable extends Object {
           if (Renderer.state.reactive) {
             this.__subscribers__.forEach(
               (subscriber, subscriberIndex, subscribers) => {
+                this.$clean(subscriber, subscriberIndex, target);
                 if (subscriber.key == prop) {
                   subscriber?.instructions(target[prop], subscriber.data);
                 }
-                this.$clean(subscriber, subscriberIndex, target);
               }
             );
           }
@@ -130,7 +130,7 @@ class AccentObservable extends Object {
   }
 }
 
-// Defines the structure for a built-in Accent module. 
+// Defines the structure for a built-in Accent module.
 class _AccentUnit {
   template;
   id;
@@ -208,7 +208,7 @@ class AccentDirective {
   constructor(id, instructions, prefix) {
     this.prefix = prefix ?? AccentDirective.prefix;
     this.id = id;
-    this.instructions = instructions || (() => { });
+    this.instructions = instructions || (() => {});
     AccentDirective.directives[id] = this;
   }
 
@@ -227,12 +227,13 @@ class AccentIterator extends _AccentUnit {
   static childNodeSelector = `${AccentDirective.prefix}for-child`;
   static iterators = new Map();
 
-  constructor(element, context, key, indexVar, iteratorVar) {
+  constructor(element, context, key, indexVar, iteratorVar, template) {
     super(element, {
       context: context,
       key: key,
       indexVar: indexVar,
-      iteratorVar: iteratorVar
+      iteratorVar: iteratorVar,
+      template: template,
     });
     AccentIterator.iterators.set(element, this);
   }
@@ -251,7 +252,9 @@ class AccentIterator extends _AccentUnit {
     if (!iterator) return;
     const it = AccentIterator.iterators.get(iterator);
     const data = it.scope;
-    const index = Array.prototype.slice.call(it.element.children).indexOf(currentFor);
+    const index = Array.prototype.slice
+      .call(it.element.children)
+      .indexOf(currentFor);
     const ret = {};
     ret[data.indexVar || "index"] = index;
     ret[data.iteratorVar || "value"] = data.context.scope[data.key][index];
@@ -262,14 +265,24 @@ class AccentIterator extends _AccentUnit {
 /* Directive Execution Functions */
 
 const _context = (el, data, instructions) => {
-  if (AccentContext.contexts.has(el)) return;
+  if (!document.documentElement.contains(el) || AccentContext.contexts.has(el))
+    return;
   const objectify = (o) => {
-    return typeof o === "string" ? Renderer.compiler._executeInContext(`return ${o}`, AccentContext.find(el), [], [], el) : o; 
+    return typeof o === "string"
+      ? Renderer.compiler._executeInContext(
+          `return ${o}`,
+          AccentContext.find(el),
+          [],
+          [],
+          el
+        )
+      : o;
   };
   const extend = el.getAttribute(`${AccentDirective.helperPrefix}extends`);
   const extendContext = AccentContext.find(extend);
   const template = extend ? extendContext?.template : data;
   const dat = objectify(template);
+  if (!dat) return;
   if (extend) Object.assign(dat, dat, objectify(data) || {});
   const id = el.getAttribute(`${AccentDirective.helperPrefix}id`);
   return new AccentContext(el, dat, id, template, instructions);
@@ -282,20 +295,22 @@ const _ref = (el, value) => {
 
 const _bind = (el, observable, attribute = "innerHTML") => {
   const attributes = Array.from(el.attributes);
-  let attrs = {}
-  attributes.forEach(a => {
+  let attrs = {};
+  attributes.forEach((a) => {
     const name = a.name;
     if (name.startsWith(AccentDirective.bindingPrefix))
       attrs[name.substr(1, a.length)] = a.value;
   });
-  attrs = Object.keys(attrs).length > 0 ? attrs : (() => {
-    let o = {};
-    o[attribute] = observable;
-    return o;
-  })();
+  attrs =
+    Object.keys(attrs).length > 0
+      ? attrs
+      : (() => {
+          let o = {};
+          o[attribute] = observable;
+          return o;
+        })();
   const context = AccentContext.find(el);
-  if (!context)
-    return;
+  if (!context) return;
   Object.keys(attrs).forEach((a) => {
     const o = attrs[a];
     context.scope.$bind(el, a, o.replace(/this\.?/g, ""));
@@ -316,19 +331,28 @@ const _model = (el, observable) => {
 // Events
 const _on = (el, value, trigger) => {
   const attributes = Array.from(el.attributes);
-  let attrs = {}
-  attributes.forEach(a => {
+  let attrs = {};
+  attributes.forEach((a) => {
     const name = a.name;
     if (name.startsWith(AccentDirective.eventPrefix))
       attrs[name.substr(1, a.length)] = a.value;
   });
-  attrs = Object.keys(attrs).length > 0 ? attrs : (() => {
-    let o = {};
-    o[trigger] = value;
-    return o;
-  })();
+  attrs =
+    Object.keys(attrs).length > 0
+      ? attrs
+      : (() => {
+          let o = {};
+          o[trigger] = value;
+          return o;
+        })();
   Object.keys(attrs).forEach((a) => {
-    const handler = Renderer.compiler._executeInContext(`return (async () => { ${attrs[a]} });`, AccentContext.find(el) ?? {}, [], [], el);
+    const handler = Renderer.compiler._executeInContext(
+      `return (async () => { ${attrs[a]} });`,
+      AccentContext.find(el) ?? {},
+      [],
+      [],
+      el
+    );
     el[a] = handler;
   });
 };
@@ -344,7 +368,13 @@ const _submit = (el, value) => {
 const _if = (el, value) => {
   const context = AccentContext.find(el);
   const change = () => {
-    Renderer.compiler._executeInContext(`return ${value}`, context ?? {}, [], [], el)
+    Renderer.compiler._executeInContext(
+      `return ${value}`,
+      context ?? {},
+      [],
+      [],
+      el
+    )
       ? (el.style.display = "")
       : (el.style.display = "none");
   };
@@ -361,6 +391,7 @@ const _show = (el, value) => {
 };
 
 const _for = (el, value, iterator, iterable, template, indexVar = "index") => {
+  const existingIterable = AccentIterator.iterators.get(el);
   const sides = value.split(" in ").map((s) => {
     const side = s.trim().split(" ");
     return side[side.length - 1];
@@ -385,7 +416,6 @@ const _for = (el, value, iterator, iterable, template, indexVar = "index") => {
   const evalFunc = Function(`return ${iterable}`);
 
   const iterate = async (el, iterator, iterable, template, context) => {
-
     const fillGreedy = () => {
       el.innerHTML = "";
       if (!object) return;
@@ -398,13 +428,27 @@ const _for = (el, value, iterator, iterable, template, indexVar = "index") => {
           template,
           context,
           [iterator, indexVar],
-          [value, i],
+          [value, i]
         );
         frag.appendChild(append);
       });
       el.append(frag);
     };
     const fillLazy = () => {
+      const areEqual = (a, b) => {
+        const aProps = Object.getOwnPropertyNames(a);
+        const bProps = Object.getOwnPropertyNames(b);
+        if (aProps.length != bProps.length) {
+          return false;
+        }
+        for (let propName of aProps) {
+          if (a[propName] !== b[propName]) {
+            return false;
+          }
+        }
+        return true;
+      };
+
       const nl = el.getElementsByTagName(AccentIterator.childNodeSelector);
       if (nl.length < 1) return fillGreedy();
       const frag = document.createDocumentFragment();
@@ -420,8 +464,9 @@ const _for = (el, value, iterator, iterable, template, indexVar = "index") => {
 
       let lengthOffset = 0;
       if (!longer.length || longer.length < 1) return fillGreedy();
+
       longer.every((element, index) => {
-        if (element != shorter[index]) {
+        if (element != shorter[index] || !areEqual(element, shorter[index])) {
           const objIndex = index + lengthOffset;
           if (typeof object[index] === "undefined") {
             lengthOffset--;
@@ -432,16 +477,18 @@ const _for = (el, value, iterator, iterable, template, indexVar = "index") => {
             template,
             AccentContext.find(el),
             [iterator, indexVar],
-            [element, index],
+            [element, index]
           );
           nl[objIndex]
             ? (nl[objIndex].innerHTML = content)
             : (() => {
-              lengthOffset++;
-              const append = document.createElement(AccentIterator.childNodeSelector);
-              append.innerHTML = content;
-              frag.appendChild(append);
-            })();
+                lengthOffset++;
+                const append = document.createElement(
+                  AccentIterator.childNodeSelector
+                );
+                append.innerHTML = content;
+                frag.appendChild(append);
+              })();
         }
         return true;
       });
@@ -449,12 +496,12 @@ const _for = (el, value, iterator, iterable, template, indexVar = "index") => {
     };
 
     const object = evalFunc.call(context?.scope ?? {});
-    
+
     const iterableObject = Array.isArray(object)
       ? object
       : typeof object === "object"
-        ? Object.keys(object)
-        : Array.from(object);
+      ? Object.keys(object)
+      : Array.from(object);
 
     fillLazy();
 
@@ -472,12 +519,8 @@ const _for = (el, value, iterator, iterable, template, indexVar = "index") => {
   if (Renderer.compiler._bExpressionRefersToContext(iterable, context)) {
     const it = iterable.replaceAll(/this\.?/g, "");
     context.scope.$subscribe("length", handler, data);
-    context.scope.$subscribe(
-      it,
-      handler,
-      data
-    );
-    return new AccentIterator(el, context, it, indexVar, iterator);
+    context.scope.$subscribe(it, handler, data);
+    return new AccentIterator(el, context, it, indexVar, iterator, template);
   }
 
   Renderer.compiler._resolveSubscriptions(el, context, handler);
@@ -485,7 +528,9 @@ const _for = (el, value, iterator, iterable, template, indexVar = "index") => {
 
 /* --- Access Variables --- */
 
-const $new = (Obj, ...args) => { return new Obj(...args); };
+const $new = (Obj, ...args) => {
+  return new Obj(...args);
+};
 const $context = AccentContext.get;
 const $ctx = $context;
 const $directive = (...args) => $new(AccentDirective, ...args);
@@ -498,7 +543,8 @@ const _AccentRendererConfig = {
   INTERPOLATION_TAG: `${AccentDirective.prefix.replace(/-/g, "")}`,
   DUAL_SEPARATOR: ",",
   CHILD_PARENT_SEPARATOR: ":",
-  FOR_SYNTAX: /^(let|const|var)? ?\(?(.+?), ?(.+?)?\)? (of|in) (.+?)$/g
+  FOR_SYNTAX: /^(let|const|var)? ?\(?(.+?), ?(.+?)?\)? (of|in) (.+?)$/g,
+  INTERPOLATION_COMPLETED_FLAG: `ac-loaded`,
 };
 
 /**
@@ -539,10 +585,10 @@ const Renderer = {
       document.addEventListener(
         `${_AccentRendererConfig.EVENT_PREFIX}dom-ready`,
         () => {
-          Renderer.setState("loaded", true);
+          Renderer.setState("loaded");
         }
       );
-      this.transpile(document.documentElement).then(async () => {
+      this.transpile(document.documentElement, true).then(async () => {
         document.dispatchEvent(_AccentRendererEvents.DOM_READY);
       });
     },
@@ -561,11 +607,21 @@ const Renderer = {
         });
       })
         .then(async () => {
-          this._resolveInterpolation(element);
+          this._resolveInterpolation(
+            element,
+            undefined,
+            [],
+            [],
+            undefined,
+            (el) => {
+              !AccentIterator._findInScope(el); // Ignore iterable units
+            }
+          );
           this.clean(AccentContext.contexts, "element");
           return true;
         })
         .catch((e) => {
+          console.warn(e);
           return false;
         });
     },
@@ -575,18 +631,26 @@ const Renderer = {
           map.delete(item[elementProp]);
       });
     },
-    _resolveInterpolation(content, context, argumentNames, argumentValues, scopeElement) {
+    _resolveInterpolation(
+      content,
+      context,
+      argumentNames,
+      argumentValues,
+      scopeElement,
+      ignoreFunction
+    ) {
       content =
         typeof content === "string"
           ? (() => {
-            const el = document.createElement("span");
-            el.innerHTML = content;
-            return el;
-          })()
+              const el = document.createElement("span");
+              el.innerHTML = content;
+              return el;
+            })()
           : content;
       content
-        .querySelectorAll(_AccentRendererConfig.INTERPOLATION_TAG)
+        .querySelectorAll(`${_AccentRendererConfig.INTERPOLATION_TAG}, [${_AccentRendererConfig.INTERPOLATION_TAG}]`)
         .forEach((el) => {
+          if (typeof ignoreFunction === "function" && !ignoreFunction(el)) return;
           const template = el.innerHTML;
           const set = (sub, dat) => {
             context = context || AccentContext.find(el);
@@ -600,7 +664,7 @@ const Renderer = {
             el.innerHTML = compiledContent ?? "";
           };
           set();
-          this._resolveSubscriptions(el, context, set);
+          !this._resolveSubscriptions(el, context, set)
         });
       return content.body ? content.body.innerHTML : content.innerHTML;
     },
@@ -614,7 +678,9 @@ const Renderer = {
           const key = s.split(_AccentRendererConfig.CHILD_PARENT_SEPARATOR)[1];
           context.scope.$subscribe(key ?? s, handler, { _AccentElement: el });
         });
+        return true;
       }
+      return false;
     },
     _executeInContext(
       expression,
@@ -659,10 +725,11 @@ const Renderer = {
   },
 };
 
-window.addEventListener("load", () => {
-  Renderer.compiler.render();
-});
-
+if (typeof Components === "undefined") {
+  window.addEventListener("load", () => {
+    Renderer.compiler.render();
+  });
+}
 // Detects and renders changes in the DOM automatically
 class RendererChangeDetector {
   // Listens for changes to the DOM and reloads the necessary AccentUnits.
@@ -688,14 +755,6 @@ class RendererChangeDetector {
             const dupes = directives.filter(
               (value, index, self) => self.indexOf(value) !== index
             );
-
-            const tagName = n.tagName?.toLowerCase();
-            if (
-              typeof Components !== "undefined" &&
-              AccentComponent.components.has(tagName)
-            ) {
-              AccentComponent.components.get(tagName).$compile();
-            }
 
             if (dupes.length > 0) {
               dupes.forEach((directive, i) => {

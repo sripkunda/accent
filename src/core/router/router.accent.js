@@ -6,122 +6,135 @@
 
 /** Class that represents the AccentRouter **/
 class Router {
-  static app = undefined;
-  routes; // The routes that are to be stored
-  currentRoute; // The current route of the system
-  currentPath; // The current path of the system
-  defaultPane; // The default pane for this router
-  #routerCache = {}; // The cached pages that the router loads
+    static app = undefined;
+    routes; // The routes that are to be stored
+    currentRoute; // The current route of the system
+    currentPath; // The current path of the system
+    defaultPane; // The default pane for this router
+    #routerCache = {}; // The cached pages that the router loads
 
-  params = {}; // The dynamic link data from the router
+    params = {}; // The dynamic link data from the router
 
-  /**
-   *
-   * @constructor
-   * @param {(Object|string)} routes - The list of routes that the router will store
-   * @param {Object} args - The options/arguments for the router
-   */
-  constructor(routes, args = {}) {
-    if (Router.app) throw Error(_AccentRouterErrors.ROUTER_ALREADY_RUNNING());
-    const pane = args.pane;
-    const async = args.loadPagesAsync;
+    /**
+     *
+     * @constructor
+     * @param {(Object|string)} routes - The list of routes that the router will store
+     * @param {Object} args - The options/arguments for the router
+     */
+    constructor(routes, args = {}) {
+        if (Router.app) throw Error(_AccentRouterErrors.ROUTER_ALREADY_RUNNING());
+        const pane = args.pane;
+        const async = args.loadPagesAsync;
 
-    // Asynchronously execute code to use await in context
-    (async () => {
-      // Find routes
-      this.routes =
-        typeof routes === "object"
-          ? routes
-          : await Router.#fetch(routes, "json").then((routes) => {
-            document.dispatchEvent(_AccentRouterEvents.ROUTES_RECOGNIZED); // After routes are recognized,
-            return routes; // Return the routes to assign the value
-          });
-      this.defaultPane = pane; // Assign the default pane for this router
-      await Router.route(this, location.pathname, true, pane); // Route to the new path based on the pathname
-      this.#beginNavigation(); // Start the navigation (popstate event)
+        // Asynchronously execute code to use await in context
+        (async() => {
+            // Find routes
+            this.routes =
+                typeof routes === "object" ?
+                routes :
+                await Router.#fetch(routes, "json").then((routes) => {
+                    document.dispatchEvent(_AccentRouterEvents.ROUTES_RECOGNIZED); // After routes are recognized,
+                    return routes; // Return the routes to assign the value
+                });
+            this.defaultPane = pane; // Assign the default pane for this router
+            await Router.route(this, location.pathname, true, pane); // Route to the new path based on the pathname
+            this.#beginNavigation(); // Start the navigation (popstate event)
 
-      // Load pages in the background to the router cache
-      if (!(async == false)) {
-        this.#cachePagesAsync().then((v) => {
-          document.dispatchEvent(v); // Dispatch the event for caching all of the pages asynchronously
-        });
-      }
-      document.dispatchEvent(_AccentRouterEvents.ROUTER_INIT);
-    })();
-    Router.app = this;
-  }
-
-  /**
-   * Add a popstate listener for browser forward and back to ensure that routing is being used.
-   */
-  async #beginNavigation() {
-    window.addEventListener("popstate", (event) => {
-      Router.route(this, window.location.pathname, true);
-    });
-  }
-
-  /**
-   * Caches the pages on the routes in the background as the page loads.
-   */
-  async #cachePagesAsync() {
-    return await new Promise((res, rej) => {
-      const routes = Object.keys(this.routes);
-      routes.forEach(async (r, i) => {
-        if (
-          this.routes[r].load == _AccentRouteLoadTypes.LOAD_LAZY ||
-          this.routes[r].load == _AccentRouteLoadTypes.LOAD_UNCACHED
-        )
-          return;
-        this.#routerCache[r] = {
-          name: r,
-          html: await this.#fetchPageAsync(r),
-        };
-        if (routes.length == i + 1)
-          res(_AccentRouterEvents.ROUTES_LOADED_ASYNC);
-      });
-    }).then((v) => {
-      return v;
-    });
-  }
-
-  /**
-   * Loads content for a specific route onto a given pane.
-   * @param  {string} destination
-   * @param  {boolean} isRoot
-   * @param  {Object} parameters
-   * @param  {HTMLElement} targetPane
-   */
-  async fillPane(destination, isRoot, parameters, targetPane, childPane) {
-    // Get the routing information
-    targetPane = targetPane || document.querySelector(`${_AccentRouterConfig.ROUTER_PANE_TAGNAME}`);
-    if (!targetPane) throw Error(_AccentRouterErrors.TARGET_NOT_FOUND(destination));
-    if (!childPane) this.defaultPane = targetPane;
-
-    const cache = this.#routerCache
-      ? this.#routerCache[destination]
-      : undefined; // Get document data from routerCache
-
-    if (childPane) {
-      const route = Router._getRouteFromInput(this, `${this.currentPath}${destination}`);
-      if (this.currentPath != route.destination) await Router.route(this, route.destination, false);
-      this.params = route.dynamics;
-      return window.history.pushState({ content: "", title: document.title }, document.title, `${this.currentPath}${destination}`);
+            // Load pages in the background to the router cache
+            if (!(async == false)) {
+                this.#cachePagesAsync().then((v) => {
+                    document.dispatchEvent(v); // Dispatch the event for caching all of the pages asynchronously
+                });
+            }
+            document.dispatchEvent(_AccentRouterEvents.ROUTER_INIT);
+        })();
+        Router.app = this;
     }
 
-    const route = await (async () => {
-      return cache?.html ? cache : await this.#fetchPage(destination ?? this.routes);
-    })();
+    /**
+     * Add a popstate listener for browser forward and back to ensure that routing is being used.
+     */
+    async #beginNavigation() {
+        window.addEventListener("popstate", (event) => {
+            Router.route(this, window.location.pathname, true);
+        });
+    }
 
-    const doc = new DOMParser().parseFromString(route.html, "text/html"); // Parse the document data as HTML
+    /**
+     * Caches the pages on the routes in the background as the page loads.
+     */
+    async #cachePagesAsync() {
+        return await new Promise((res, rej) => {
+            const routes = Object.keys(this.routes);
+            routes.forEach(async(r, i) => {
+                if (
+                    this.routes[r].load == _AccentRouteLoadTypes.LOAD_LAZY ||
+                    this.routes[r].load == _AccentRouteLoadTypes.LOAD_UNCACHED
+                )
+                    return;
+                this.#routerCache[r] = {
+                    name: r,
+                    html: await this.#fetchPageAsync(r),
+                };
+                if (routes.length == i + 1)
+                    res(_AccentRouterEvents.ROUTES_LOADED_ASYNC);
+            });
+        }).then((v) => {
+            return v;
+        });
+    }
 
-    // Get the final path that needs to be pushed to the history
-    let path = Array.isArray(this.routes[route.name]["path"])
-      ? this.routes[route.name]["path"][0] // If the path is an array, then get the 0th element of the paths array
-      : this.routes[route.name]["path"]; // Otherwise, get the path normally
+    /**
+     * Loads content for a specific route onto a given pane.
+     * @param  {string} destination
+     * @param  {boolean} isRoot
+     * @param  {Object} parameters
+     * @param  {HTMLElement} targetPane
+     */
+    async fillPane(destination, isRoot, parameters, targetPane, childPane) {
+            // Get the routing information
+            targetPane =
+                targetPane ||
+                document.querySelector(`${_AccentRouterConfig.ROUTER_PANE_TAGNAME}`);
+            if (!targetPane)
+                throw Error(_AccentRouterErrors.TARGET_NOT_FOUND(destination));
+            if (!childPane) this.defaultPane = targetPane;
 
-    // Replace all instances of ':param' in the path with the appropriate parameter.
-    path = path.replace(_AccentRouterConfig.ROUTER_DYNAMIC_LINK, (_a, b) => {
-      return `${parameters ? (parameters[b] ? `${parameters[b]}/` : "") : ""}`;
+            const cache = this.#routerCache ?
+                this.#routerCache[destination] :
+                undefined; // Get document data from routerCache
+
+            if (childPane) {
+                const route = Router._getRouteFromInput(
+                    this,
+                    `${this.currentPath}${destination}`
+                );
+                if (this.currentPath != route.destination)
+                    await Router.route(this, route.destination, false);
+                this.params = route.dynamics;
+                return window.history.pushState({ content: "", title: document.title },
+                    document.title,
+                    `${this.currentPath}${destination}`
+                );
+            }
+
+            const route = await (async() => {
+                return cache?.html ?
+                    cache :
+                    await this.#fetchPage(destination ?? this.routes);
+            })();
+
+            const doc = new DOMParser().parseFromString(route.html, "text/html"); // Parse the document data as HTML
+
+            // Get the final path that needs to be pushed to the history
+            let path = Array.isArray(this.routes[route.name]["path"]) ?
+                this.routes[route.name]["path"][0] // If the path is an array, then get the 0th element of the paths array
+                :
+                this.routes[route.name]["path"]; // Otherwise, get the path normally
+
+            // Replace all instances of ':param' in the path with the appropriate parameter.
+            path = path.replace(_AccentRouterConfig.ROUTER_DYNAMIC_LINK, (_a, b) => {
+                        return `${parameters ? (parameters[b] ? `${parameters[b]}/` : "") : ""}`;
     });
 
     this.currentPath = path;
@@ -186,9 +199,15 @@ class Router {
     this.#executeScripts(targetPane, route.name); // Execute javascript on the pane
     this.configureRoutingLinks(); // Detect routing links and add appropriate event listeners
 
-    // If the AccentRenderer module is attached, transpile the page again to account for the changes
-    if (typeof Renderer !== "undefined") {
-      Renderer.compiler.transpile(targetPane)
+    // Recompile relevant items
+
+    if (typeof Components !== 'undefined') {
+      const handler = typeof Renderer !== 'undefined' ? () => {
+        Renderer.compiler.transpile(targetPane);
+      } : () => {}; 
+      Components.compiler.transpile(targetPane).then(handler);
+    } else if (typeof Renderer !== "undefined") {
+       Renderer.compiler.transpile(targetPane);
     }
   }
 
@@ -279,12 +298,14 @@ class Router {
         if (!href) return; // Exit if the href does not exist
         if (el["__route__"]) return;
         // Add the onclick event
-        el.onclick = handler ? ((event) => {
-          handler(event, href);
-        }) : ((event) => {
-          event.preventDefault();
-          Router.route(this, href, false, this.defaultPane); // Route on clicked to the destination
-        });
+        el.onclick = handler
+          ? (event) => {
+              handler(event, href);
+            }
+          : (event) => {
+              event.preventDefault();
+              Router.route(this, href, false, this.defaultPane); // Route on clicked to the destination
+            };
         el["__route__"] = true;
       });
   }
@@ -295,7 +316,10 @@ class Router {
    * @return {string} - The formatted path
    */
   #formatPath(path) {
-    return `//${window.location.host.replace(/\/$/, "")}/${path}`.replace(/\/?$/, '');
+    return `//${window.location.host.replace(/\/$/, "")}/${path}`.replace(
+      /\/?$/,
+      ""
+    );
   }
 
   /**
