@@ -506,7 +506,6 @@ const _for = (el, value, iterator, iterable, template, indexVar = "index") => {
     fillLazy();
     previousObjectSnapshot = Object.assign([], iterableObject);
     Renderer.compiler.transpile(el);
-
   };
 
   const context = AccentContext.find(el);
@@ -534,6 +533,7 @@ const $new = (Obj, ...args) => {
 };
 const $context = AccentContext.get;
 const $ctx = $context;
+const $for = _for
 const $directive = (...args) => $new(AccentDirective, ...args);
 const $observable = (...args) => $new(AccentObservable, ...args);
 
@@ -614,7 +614,8 @@ const Renderer = {
             [],
             [],
             undefined,
-            (el) => !AccentIterator._findInScope(el)  // Ignore iterable units
+            (el) => !AccentIterator._findInScope(el) && !(Components && el.closest(_AccentComponentsConfig.COMPONENT_TAGNAME))
+             // Ignore iterable units and components
           );
           this.clean(AccentContext.contexts, "element");
           return true;
