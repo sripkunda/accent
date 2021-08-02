@@ -614,7 +614,7 @@ const Renderer = {
             [],
             [],
             undefined,
-            (el) => !AccentIterator._findInScope(el) && !(Components && el.closest(_AccentComponentsConfig.COMPONENT_TAGNAME))
+            (el) => !AccentIterator._findInScope(el) && !(el.closest('component'))
              // Ignore iterable units and components
           );
           this.clean(AccentContext.contexts, "element");
@@ -725,11 +725,12 @@ const Renderer = {
   },
 };
 
-if (typeof Components === "undefined") {
-  window.addEventListener("load", () => {
+window.addEventListener("load", () => {
+  if (typeof Components === "undefined") {
     Renderer.compiler.render();
-  });
-}
+  }
+});
+
 // Detects and renders changes in the DOM automatically
 class RendererChangeDetector {
   // Listens for changes to the DOM and reloads the necessary AccentUnits.
