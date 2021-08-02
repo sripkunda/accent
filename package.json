@@ -22,5 +22,8 @@
   "bugs": {
     "url": "https://github.com/sripkunda/accent.js/issues"
   },
-  "homepage": "https://github.com/sripkunda/accent.js#readme"
+  "homepage": "https://github.com/sripkunda/accent.js#readme",
+  "dependencies": {
+    "react-feather": "^2.0.9"
+  }
 }

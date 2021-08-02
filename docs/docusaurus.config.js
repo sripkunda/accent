@@ -4,19 +4,19 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
 /** @type {import('@docusaurus/types').DocusaurusConfig} */
 module.exports = {
   title: 'Accent.js',
-  tagline: 'A modular, functional, and easy to use framework - in <10kb',
+  tagline: 'A fully modular, functional, and easy to use framework - all in less than 10kb',
   url: 'https://accent.js.org',
   baseUrl: '/',
-  onBrokenLinks: 'throw',
+  onBrokenLinks: 'warn',
   onBrokenMarkdownLinks: 'warn',
   favicon: 'img/favicon.ico',
   organizationName: 'sripkunda', // Usually your GitHub org/user name.
   projectName: 'accent.js', // Usually your repo name.
   themeConfig: {
     navbar: {
-      title: 'My Site',
+      title: 'Accent.js',
       logo: {
-        alt: 'My Site Logo',
+        alt: 'Accent.js',
         src: 'img/logo.svg',
       },
       items: [
@@ -34,7 +34,7 @@ module.exports = {
       ],
     },
     footer: {
-      style: 'dark',
+      style: 'light',
       copyright: `Copyright © ${new Date().getFullYear()} Sri Pranav Kunda`,
     },
     prism: {

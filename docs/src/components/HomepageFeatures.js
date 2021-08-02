@@ -8,31 +8,28 @@ const FeatureList = [
     Svg: require('../../static/img/undraw_docusaurus_mountain.svg').default,
     description: (
       <>
-        Docusaurus was designed from the ground up to be easily installed and
-        used to get your website up and running quickly.
+        Accent is built for easy and fast development, with a simple API built for applications of all sizes.
       </>
     ),
   },
   {
-    title: 'Focus on What Matters',
+    title: 'Fully Modular',
     Svg: require('../../static/img/undraw_docusaurus_tree.svg').default,
     description: (
       <>
-        Docusaurus lets you focus on your docs, and we&apos;ll do the chores. Go
-        ahead and move your docs into the <code>docs</code> directory.
+        Accent is made up of different standalone modules, or "libraries" that work together. You use only what you need for your project.
       </>
     ),
   },
   {
-    title: 'Powered by React',
+    title: 'Lightweight',
     Svg: require('../../static/img/undraw_docusaurus_react.svg').default,
     description: (
       <>
-        Extend or customize your website layout by reusing React. Docusaurus can
-        be extended while reusing the same header and footer.
+        Accent is fast and allows you to write fully optimized and secure web applications in minutes.
       </>
     ),
-  },
+  }
 ];
 
 function Feature({Svg, title, description}) {
@@ -51,14 +48,14 @@ function Feature({Svg, title, description}) {
 
 export default function HomepageFeatures() {
   return (
-    <section className={styles.features}>
-      <div className="container">
-        <div className="row">
-          {FeatureList.map((props, idx) => (
-            <Feature key={idx} {...props} />
-          ))}
+      <section className={styles.features}>
+        <div className="container">
+          <div className="row">
+            {FeatureList.map((props, idx) => (
+              <Feature key={idx} {...props} />
+            ))}
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
   );
 }

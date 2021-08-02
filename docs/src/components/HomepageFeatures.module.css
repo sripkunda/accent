@@ -1,6 +1,8 @@
 /* stylelint-disable docusaurus/copyright-header */
 
 .features {
+  background: #E76F51;
+  color: white;
   display: flex;
   align-items: center;
   padding: 2rem 0;
