@@ -436,6 +436,7 @@ const _for = (el, value, iterator, iterable, template, indexVar = "index") => {
     };
     const fillLazy = () => {
       const areEqual = (a, b) => {
+        if (!(typeof a === 'object' && typeof b === 'object')) return false;
         const aProps = Object.getOwnPropertyNames(a);
         const bProps = Object.getOwnPropertyNames(b);
         if (aProps.length != bProps.length) {
@@ -466,7 +467,7 @@ const _for = (el, value, iterator, iterable, template, indexVar = "index") => {
       if (!longer.length || longer.length < 1) return fillGreedy();
 
       longer.every((element, index) => {
-        if (element != shorter[index] || !areEqual(element, shorter[index])) {
+        if (element != shorter[index] && !areEqual(element, shorter[index])) {
           const objIndex = index + lengthOffset;
           if (typeof object[index] === "undefined") {
             lengthOffset--;
