@@ -104,9 +104,10 @@ class AccentAnimation {
  * @param {(string|HTMLElement)} selector - Selector of element to apply animation to.
  * @param  {...any} args - AccentAnimation initialization arguments
  */
-const $anim = (selector, ...args) => {
+const $animate = (selector, ...args) => {
   return new AccentAnimation(...args).apply(selector);
 };
+const $anim = $animate;
 
 /**
  * Potential errors for the AccentAnimation library
@@ -126,4 +127,12 @@ const _AccentAnimationErrors = {
  */
 const _AccentAnimationConfig = {
   TOGGLE_IDENTIFIER: `$toggle`,
+};
+
+window.AnimationsLibrary = true;
+
+export default {
+  AccentAnimation,
+  $animate,
+  $anim,
 };

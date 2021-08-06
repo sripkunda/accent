@@ -391,7 +391,6 @@ const _show = (el, value) => {
 };
 
 const _for = (el, value, iterator, iterable, template, indexVar = "index") => {
-  const existingIterable = AccentIterator.iterators.get(el);
   const sides = value.split(" in ").map((s) => {
     const side = s.trim().split(" ");
     return side[side.length - 1];
@@ -436,7 +435,7 @@ const _for = (el, value, iterator, iterable, template, indexVar = "index") => {
     };
     const fillLazy = () => {
       const areEqual = (a, b) => {
-        if (!(typeof a === 'object' && typeof b === 'object')) return false;
+        if (!(typeof a === "object" && typeof b === "object")) return false;
         const aProps = Object.getOwnPropertyNames(a);
         const bProps = Object.getOwnPropertyNames(b);
         if (aProps.length != bProps.length) {
@@ -534,7 +533,7 @@ const $new = (Obj, ...args) => {
 };
 const $context = AccentContext.get;
 const $ctx = $context;
-const $for = _for
+const $for = _for;
 const $directive = (...args) => $new(AccentDirective, ...args);
 const $observable = (...args) => $new(AccentObservable, ...args);
 
@@ -615,8 +614,8 @@ const Renderer = {
             [],
             [],
             undefined,
-            (el) => !AccentIterator._findInScope(el) && !(el.closest('component'))
-             // Ignore iterable units and components
+            (el) => !AccentIterator._findInScope(el) && !el.closest("component")
+            // Ignore iterable units and components
           );
           this.clean(AccentContext.contexts, "element");
           return true;
@@ -649,9 +648,12 @@ const Renderer = {
             })()
           : content;
       content
-        .querySelectorAll(`${_AccentRendererConfig.INTERPOLATION_TAG}, [${_AccentRendererConfig.INTERPOLATION_TAG}]`)
+        .querySelectorAll(
+          `${_AccentRendererConfig.INTERPOLATION_TAG}, [${_AccentRendererConfig.INTERPOLATION_TAG}]`
+        )
         .forEach((el) => {
-          if (typeof ignoreFunction === "function" && !ignoreFunction(el)) return;
+          if (typeof ignoreFunction === "function" && !ignoreFunction(el))
+            return;
           const template = el.innerHTML;
           const set = (sub, dat) => {
             context = context || AccentContext.find(el);
@@ -665,7 +667,7 @@ const Renderer = {
             el.innerHTML = compiledContent ?? "";
           };
           set();
-          !this._resolveSubscriptions(el, context, set)
+          !this._resolveSubscriptions(el, context, set);
         });
       return content.body ? content.body.innerHTML : content.innerHTML;
     },
@@ -727,7 +729,7 @@ const Renderer = {
 };
 
 window.addEventListener("load", () => {
-  if (typeof Components === "undefined") {
+  if (typeof ComponentsLibrary !== "undefined") {
     Renderer.compiler.render();
   }
 });
@@ -777,3 +779,19 @@ class RendererChangeDetector {
     }
   }).observe(document, { attributes: true, childList: true, subtree: true });
 }
+
+window.RendererLibrary = true;
+
+export default {
+  RendererChangeDetector,
+  AccentObservable,
+  AccentContext,
+  AccentDirective,
+  AccentIterator,
+  $context,
+  $ctx,
+  $for,
+  $directive,
+  $observable,
+  Renderer,
+};

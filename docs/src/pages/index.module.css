@@ -10,8 +10,14 @@
   text-align: center;
   position: relative;
   overflow: hidden;
-  background-color: #fff; 
+  background-color: #fff;
   color: black;
+  height: 80vh;
+}
+
+html[data-theme="dark"] .heroBanner {
+  background-color: #18191a;
+  color: white;
 }
 
 @media screen and (max-width: 966px) {
@@ -24,4 +30,5 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  margin: 10px;
 }
