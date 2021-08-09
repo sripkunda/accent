@@ -31,7 +31,7 @@ npm install @accent/<library-name>
 <script src="https://unpkg.com/@accent/<library-name>"></script>
 ```
 
-Replace `<library-name>` with the name of the library you wish to install. A full list of Accent.js libraries can be found [here](fundamentals/modularity).
+Replace `<library-name>` with the name of the library you wish to install. A full list of Accent.js libraries can be found [here](fundamentals/modularity#list-of-libraries).
 
 ## Resources and Contributing
 

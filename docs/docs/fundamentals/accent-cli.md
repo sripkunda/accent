@@ -49,7 +49,7 @@ This will create a new directory with the following file structure:
     ├── shared
 ├── index.html
 ├── app.js
-├── ac.config.json # Used to indicate the root of an Accent project. May be utilized for additional CLI actions in the future.
+├── ac.config.json # Used to indicate the root of an Accent project.
 ```
 
 This structure can be altered in any way you see fit.

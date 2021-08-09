@@ -61,7 +61,7 @@ Here, we are adding both the **router** and **renderer** libraries into our appl
 
 Accent creates one global object for all functionality across all libraries to maintain consistency and simplicity. Because of this, importing specific exports from each each library is currently not supported.
 
-To use Accent in the browser, import each library globally as shown below.
+To use Accent through JS modules, import each library globally as shown below.
 
 ```js
 import "@accent/renderer";
@@ -81,4 +81,20 @@ Accent.$context(document.body, {
 });
 
 // More code ...
+```
+
+You can also do this in [supported browsers](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules): 
+
+```html
+<script type="module">
+  import "@accent/renderer";
+  import "@accent/router";
+  import "@accent/components";
+
+  Accent.$context(document.body, {
+    foo: "bar",
+  });
+
+  // More code ...
+</script>
 ```

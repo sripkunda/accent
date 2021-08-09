@@ -4,8 +4,6 @@ sidebar_position: 2
 
 # Observables
 
-**Make sure you have the `@accent/renderer` library installed to use observables.**
-
 ## Introduction to Reactivity
 
 Many of Accent's features are based on the concept of **reactivity**. This means that when the state of your application is changed, the change will be reflected appropriately in the view (or in the DOM).
@@ -43,6 +41,8 @@ myObservable.$subscribe("foo", (value) => {
 });
 ```
 
+In the example above, every time the value of `foo` in `myObservable` changes, the new value of `foo` will be logged to the console.
+
 You can also add custom data specific to each subscriber. This data can be accessed using the second parameter in your callback function.
 
 ```js
@@ -56,3 +56,5 @@ myObservable.$subscribe(
   }
 );
 ```
+
+Many of Accent's features, such as bindings and contexts, use observables for reactivity. However, they can also be used by themselves to implement custom logic.

@@ -563,7 +563,6 @@
   };
   const $context = AccentContext.get;
   const $ctx = $context;
-  const $for = _for;
   const $directive = (...args) => $new(AccentDirective, ...args);
   const $observable = (...args) => $new(AccentObservable, ...args);
 
@@ -812,7 +811,6 @@
     AccentIterator,
     $context,
     $ctx,
-    $for,
     $directive,
     $observable,
     Renderer,

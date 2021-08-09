@@ -88,7 +88,7 @@ The syntax for Accent's custom tags maintain consistency relative to each librar
     <router-target></router-target>
     <!-- <router-[something]> -->
     <component ref="my-component">This is Accent!</component>
-    <!-- <component>- -->
+    <!-- <component> -->
 
     <!-- Accent.js -->
     <script src="https://unpkg.com/@accent/router"></script>
