@@ -58,6 +58,21 @@ Accent.$context(document.body); // { foo: 'bar' } (Accessing via. HTML element r
 Accent.$context("myId"); // { foo: 'bar' } (Accessing via. context ID)
 ```
 
+### Calling Functions Inside Contexts
+ 
+To call functions inside contexts, you can call the function as usual. However, the function will be called at a global scope. To access a context inside of a function, you must pass the context data into the function as a parameter.
+
+```html
+<body ac-context="{ 
+    foo: 'bar', 
+    myFunc: (ctx) => {
+        console.log(ctx.foo) // bar
+    }
+}">
+    <button ac-click="this.myFunc(this);">Click Me</button>
+</body>
+```
+
 ### Nested Contexts
 
 Elements inside context groups can **only** read members that are in the local group. Therefore, nested contexts (contexts inside of each other) can only access members in the closest nested context. 
