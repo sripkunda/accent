@@ -101,7 +101,7 @@ Let's create a simple list of tasks in our context called `todo` and render it r
 Behind the scenes, Accent has created a relationship between the `todo` array and the `ac-for` loop. This means that if we push a new item to the list as shown below, the list will automatically update. 
 
 ```js
-$context("myContext").todo.push("New task");
+Accent.$context("myContext").todo.push("New task");
 ```
 
 **Updated List:**

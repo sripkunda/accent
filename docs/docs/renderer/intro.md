@@ -48,4 +48,4 @@ npm install @accent/renderer
 - [Directives](directives)
 - [Units (Scoped Groups)](units)
 - [Text Interpolation](text-interpolation)
-- [Special Scenarios](special-scenarios)
+- [Reference](reference/$observable)
