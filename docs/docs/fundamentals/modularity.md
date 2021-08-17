@@ -83,13 +83,15 @@ Accent.$context(document.body, {
 // More code ...
 ```
 
+> **Note:** You must use a module bundler such as [Webpack](https://webpack.js.org/) or [Rollup](https://rollupjs.org/) to import Accent.js as shown above.
+
 You can also do this in [supported browsers](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules): 
 
 ```html
 <script type="module">
-  import "@accent/renderer";
-  import "@accent/router";
-  import "@accent/components";
+  import "https://unpkg.com/@accent/renderer";
+  import "https://unpkg.com/@accent/router";
+  import "https://unpkg.com/@accent/components";
 
   Accent.$context(document.body, {
     foo: "bar",

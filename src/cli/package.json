@@ -12,7 +12,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/sripkunda/accent.js.git"
+    "url": "git+https://github.com/sripkunda/accent.git"
   },
   "keywords": [
     "Accent.js"
@@ -20,12 +20,13 @@
   "author": "Sri Pranav Kunda",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/sripkunda/accent.js/issues"
+    "url": "https://github.com/sripkunda/accent/issues"
   },
-  "homepage": "https://github.com/sripkunda/accent.js#readme",
+  "homepage": "https://github.com/sripkunda/accent#readme",
   "dependencies": {
     "boxen": "^5.0.1",
     "server": "^1.0.34",
+    "webpack": "^5.50.0",
     "yargs": "^17.0.1"
   },
   "devDependencies": {

@@ -1,6 +1,6 @@
 {
   "name": "@accent/router",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Official router for Accent.js",
   "main": "router.min.js",
   "scripts": {
@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/sripkunda/accent.js.git"
+    "url": "git+https://github.com/sripkunda/accent.git"
   },
   "keywords": [
     "Accent.js",
@@ -17,7 +17,7 @@
   "author": "Sri Pranav Kunda",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/sripkunda/accent.js/issues"
+    "url": "https://github.com/sripkunda/accent/issues"
   },
-  "homepage": "https://github.com/sripkunda/accent.js#readme"
+  "homepage": "https://github.com/sripkunda/accent#readme"
 }

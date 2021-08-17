@@ -47,13 +47,13 @@ module.exports = {
           label: "Animations",
         },
         {
-          href: "https://github.com/sripkunda/accent.js/stargazers",
+          href: "https://github.com/sripkunda/accent/stargazers",
           label: "GitHub",
           position: "left",
           label: "Star on GitHub",
         },
         {
-          href: "https://github.com/sripkunda/accent.js",
+          href: "https://github.com/sripkunda/accent",
           label: "GitHub",
           position: "right",
         },
@@ -75,7 +75,7 @@ module.exports = {
         docs: {
           sidebarPath: require.resolve("./sidebars.js"),
           // Please change this to your repo.
-          editUrl: "https://github.com/sripkunda/accent.js/tree/master/docs/",
+          editUrl: "https://github.com/sripkunda/accent/tree/master/docs/",
         },
         theme: {
           customCss: require.resolve("./src/css/custom.css"),

@@ -20,7 +20,7 @@ Accent.js can be installed through a CDN or through NPM. Build tools are not req
 #### NPM Installation
 
 ```shell
-npm install @accent/<library-name>
+npm install @accent/[library-name]
 ```
 
 #### CDN
@@ -28,15 +28,15 @@ npm install @accent/<library-name>
 **Ensure that all Accent.js libraries are included **before** any additional JavaScript logic.** The order that the libraries are included in does not matter.
 
 ```html
-<script src="https://unpkg.com/@accent/<library-name>"></script>
+<script src="https://unpkg.com/@accent/[library-name]"></script>
 ```
 
 Replace `<library-name>` with the name of the library you wish to install. A full list of Accent.js libraries can be found [here](fundamentals/modularity#list-of-libraries).
 
 ## Resources and Contributing
 
-Report issues at our [issue tracker on GitHub](https://github.com/sripkunda/accent.js/issues). We will get to it as soon as possible.
+Report issues at our [issue tracker on GitHub](https://github.com/sripkunda/accent/issues). We will get to it as soon as possible.
 
-For additional help, head over to the [discussions page](https://github.com/sripkunda/accent.js/discussions).
+For additional help, head over to the [discussions page](https://github.com/sripkunda/accent/discussions).
 
-#### [Contribute ➜](https://github.com/sripkunda/accent.js/issues)
+#### [Contribute ➜](https://github.com/sripkunda/accent/issues)
