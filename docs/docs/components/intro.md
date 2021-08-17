@@ -8,13 +8,13 @@ sidebar_position: 1
 
 ### What is the Accent Renderer?
 
-Accent Components allows for compartmentalization of HTML into components, meaning that a block of reusable code such as: 
+Accent Components allows for compartmentalization of HTML into components, meaning that a block of reusable code such as:
 
 ```html
 <p>Reuse me</p>
 ```
 
-Can be simplified to: 
+Can be simplified to:
 
 ```html
 <reuse-me></reuse-me>
@@ -45,19 +45,15 @@ npm install @accent/components
 
   <body>
     <div>
-        <task></task>
-        <task></task>
-        <task></task>
+      <task></task>
+      <task></task>
+      <task></task>
     </div>
 
     <component ref="task">
-        <div class="task-heading">
-            My Task
-        </div>
-        <div class="task-description">
-            My task description
-        </div>
-        <button>Remove Task</button>
+      <div class="task-heading">My Task</div>
+      <div class="task-description">My task description</div>
+      <button>Remove Task</button>
     </component>
     <!-- Accent.js -->
     <script src="https://unpkg.com/@accent/components"></script>

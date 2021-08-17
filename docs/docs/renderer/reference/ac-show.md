@@ -4,17 +4,15 @@ sidebar_position: 14
 
 # ac-show
 
-`ac-show` allows for reactive rendering of DOM elements based on boolean values in the local context group. 
+`ac-show` allows for reactive rendering of DOM elements based on boolean values in the local context group.
 
-## Usage 
+## Usage
 
 **Syntax:** `<element ac-show="name of variable in context..."></element>`
 
 ```html
 <div ac-context="{ foo: true }" @id="myContext">
-    <span ac-show="foo">
-        Foo is true!
-    </span>
+  <span ac-show="foo"> Foo is true! </span>
 </div>
 ```
 

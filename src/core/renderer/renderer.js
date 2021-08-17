@@ -291,14 +291,14 @@
     const objectify = (o) => {
       try {
         return typeof o === "string"
-        ? Renderer.compiler._executeInContext(
-            `return ${o}`,
-            AccentContext.find(el),
-            [],
-            [],
-            el
-          )
-        : o;
+          ? Renderer.compiler._executeInContext(
+              `return ${o}`,
+              AccentContext.find(el),
+              [],
+              [],
+              el
+            )
+          : o;
       } catch (e) {
         throw _AccentRendererErrors.INVALID_CONTEXT();
       }
@@ -776,7 +776,10 @@
     if (typeof ComponentsLibrary === "undefined") {
       Renderer.compiler.render();
     } else {
-      window.addEventListener("components:dom-ready", Accent.Renderer.compiler.render());
+      window.addEventListener(
+        "components:dom-ready",
+        Accent.Renderer.compiler.render()
+      );
     }
   });
 

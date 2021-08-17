@@ -8,11 +8,11 @@ Clean all subscribers to an Observable that contain references to non-existant H
 
 > **Note:** `$clean` is a member of an AccentObservable object. Refer to [the documentation for observables]($observable) for more information.
 
-## Parameters 
+## Parameters
 
 The `$clean()` method does need any parameters.
 
-## Example 
+## Example
 
 Let's clean the `foo` member of a pre-defined Accent context group.
 
@@ -20,7 +20,7 @@ Let's clean the `foo` member of a pre-defined Accent context group.
 
 ```html
 <div ac-context="{ foo: 'bar' }" @id="myContext">
-    <!-- ... -->
+  <!-- ... -->
 </div>
 ```
 

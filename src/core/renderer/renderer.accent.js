@@ -270,14 +270,14 @@ const _context = (el, data, instructions) => {
   const objectify = (o) => {
     try {
       return typeof o === "string"
-      ? Renderer.compiler._executeInContext(
-          `return ${o}`,
-          AccentContext.find(el),
-          [],
-          [],
-          el
-        )
-      : o;
+        ? Renderer.compiler._executeInContext(
+            `return ${o}`,
+            AccentContext.find(el),
+            [],
+            [],
+            el
+          )
+        : o;
     } catch (e) {
       throw _AccentRendererErrors.INVALID_CONTEXT();
     }
@@ -562,7 +562,7 @@ const _AccentRendererEvents = {
 /**
  * Potential errors for AccentRenderer
  */
-  const _AccentRendererErrors = {
+const _AccentRendererErrors = {
   AccentLibraryName: `Accent.js Renderer`,
   EXECUTION_ERROR: (...params) => {
     return `${_AccentRendererErrors.AccentLibraryName}: An error ocurred while resolving expression: \`${params[0]}\`. Verify syntax and retry.`;

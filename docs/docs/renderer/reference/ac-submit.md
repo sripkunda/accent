@@ -4,7 +4,7 @@ sidebar_position: 11
 
 # ac-submit
 
-`ac-submit` is simply an extension of the `ac-on` and serves as an alias to the `ac-on *onsubmit` identifier. 
+`ac-submit` is simply an extension of the `ac-on` and serves as an alias to the `ac-on *onsubmit` identifier.
 
 ### Usage
 

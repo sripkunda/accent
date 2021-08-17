@@ -4,7 +4,7 @@ sidebar_position: 10
 
 # ac-click
 
-`ac-click` is simply an extension of the `ac-on` and serves as an alias to the `ac-on *onclick` identifier. 
+`ac-click` is simply an extension of the `ac-on` and serves as an alias to the `ac-on *onclick` identifier.
 
 ### Usage
 

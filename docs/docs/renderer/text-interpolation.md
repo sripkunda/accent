@@ -6,7 +6,7 @@ sidebar_position: 5
 
 Text interpolation allows you to execute JavaScript logic in your HTML with access to local units (contexts, for groups, etc.). You can use this to enable reactivity in your DOM, or to conveniently execute inline JavaScript logic.
 
-## Displaying Values 
+## Displaying Values
 
 ### Introduction
 
@@ -16,17 +16,17 @@ Interpolation will automatically execute content inside of the `<ac>` and `</ac>
 <h3>One plus two is <ac>1 + 2</ac></h3>
 ```
 
-Accent will replace `<ac>1 + 2</ac>` with `<ac>3</ac>` when the interpolation is resolved. 
+Accent will replace `<ac>1 + 2</ac>` with `<ac>3</ac>` when the interpolation is resolved.
 
 ### Displaying Values From Contexts
 
-Accent ensures that you have full control over your interpolation, including when it is executed or re-executed. This means that you can manually decide whether or not interpolation is reactive. 
+Accent ensures that you have full control over your interpolation, including when it is executed or re-executed. This means that you can manually decide whether or not interpolation is reactive.
 
 When accessing members in the local context, use the `this` keyword.
 
 ```html
 <body ac-context="{ foo: 'bar' }">
-    <ac>this.foo</ac>
+  <ac>this.foo</ac>
 </body>
 ```
 
@@ -34,11 +34,11 @@ In the example above, Accent will replace `<ac>this.foo</ac>` with `<ac>bar</ac>
 
 ### Displaying Values From `ac-for`
 
-Displaying values from `ac-for` loops is similar to displaying values from local contexts, except that the `this` keyword can be omitted. 
+Displaying values from `ac-for` loops is similar to displaying values from local contexts, except that the `this` keyword can be omitted.
 
 ### Using `@subscribe` to Listen for Changes
 
-By default, interpolation will be executed once and ignored by the compiler forever. To add reactivity to your logic, you can use the `@subscribe` helper directive. `@subscribe` accepts any variables in the local context and re-executes the content in your interpolation every time one of those variables change. 
+By default, interpolation will be executed once and ignored by the compiler forever. To add reactivity to your logic, you can use the `@subscribe` helper directive. `@subscribe` accepts any variables in the local context and re-executes the content in your interpolation every time one of those variables change.
 
 Let's say we have a context defined with the below variables:
 
@@ -62,15 +62,15 @@ Now, the interpolation will only be re-executed every time the value of `first` 
 
 ### `ac` Attribute
 
-As an alternative to the `<ac>` tag, the `ac` attribute allows for text interpolation within a specific element. 
+As an alternative to the `<ac>` tag, the `ac` attribute allows for text interpolation within a specific element.
 
-For example: 
+For example:
 
 ```html
 <p><ac>1 + 2</ac></p>
 ```
 
-This can be rewritten as: 
+This can be rewritten as:
 
 ```html
 <p ac>1 + 2</p>

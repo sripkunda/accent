@@ -14,21 +14,22 @@ Let's say we have the following variables:
 
 ```js
 const show = true;
-const foo = true; 
+const foo = true;
 const bar = false;
 ```
 
 ```html
-The output is <span ac-if="show && foo">foo</span><span ac-if="show && bar">bar</span>
+The output is <span ac-if="show && foo">foo</span
+><span ac-if="show && bar">bar</span>
 ```
 
 This would result in: `The output is foo`.
 
-If we had provided the following variables instead: 
+If we had provided the following variables instead:
 
 ```js
 const show = false;
-const foo = false; 
+const foo = false;
 const bar = true;
 ```
 
@@ -42,17 +43,18 @@ Let's transfer the `foo`, `bar`, and `show` variables to a local context group a
 
 ```html
 <div ac-context="{ show: true, foo: true, bar: false }" @id="myContext">
-    The output is <span ac-if="this.show && this.foo" @subscribe="foo, show">foo</span><span ac-if="this.show && this.bar" @subscribe="bar, show">bar</span>
+  The output is
+  <span ac-if="this.show && this.foo" @subscribe="foo, show">foo</span
+  ><span ac-if="this.show && this.bar" @subscribe="bar, show">bar</span>
 </div>
 ```
 
 This results in `The output is foo`.
 
-Now, if we change a particular variable in the context, the view will automatically update. 
+Now, if we change a particular variable in the context, the view will automatically update.
 
 ```js
-Accent.$context('myContext').show = false; 
+Accent.$context("myContext").show = false;
 ```
 
 Now, the DOM is automatically updated to `The output is`.
-

@@ -85,7 +85,7 @@ Accent.$context(document.body, {
 
 > **Note:** You must use a module bundler such as [Webpack](https://webpack.js.org/) or [Rollup](https://rollupjs.org/) to import Accent.js as shown above.
 
-You can also do this in [supported browsers](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules): 
+You can also do this in [supported browsers](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules):
 
 ```html
 <script type="module">
