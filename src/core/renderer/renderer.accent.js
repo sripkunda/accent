@@ -268,7 +268,8 @@ const _context = (el, data, instructions) => {
   if (!document.documentElement.contains(el) || AccentContext.contexts.has(el))
     return;
   const objectify = (o) => {
-    return typeof o === "string"
+    try {
+      return typeof o === "string"
       ? Renderer.compiler._executeInContext(
           `return ${o}`,
           AccentContext.find(el),
@@ -277,6 +278,9 @@ const _context = (el, data, instructions) => {
           el
         )
       : o;
+    } catch (e) {
+      throw _AccentRendererErrors.INVALID_CONTEXT();
+    }
   };
   const extend = el.getAttribute(`${AccentDirective.helperPrefix}extends`);
   const extendContext = AccentContext.find(extend);
@@ -529,6 +533,7 @@ const _for = (el, value, iterator, iterable, template, indexVar = "index") => {
 /* --- Access Variables --- */
 
 const $new = (Obj, ...args) => {
+  if (args.length < 1) return Obj;
   return new Obj(...args);
 };
 const $context = AccentContext.get;
@@ -557,10 +562,13 @@ const _AccentRendererEvents = {
 /**
  * Potential errors for AccentRenderer
  */
-const _AccentRendererErrors = {
+  const _AccentRendererErrors = {
   AccentLibraryName: `Accent.js Renderer`,
-  SUBSCRIPTION_KEY_NOT_FOUND: (...params) => {
-    return `${_AccentRendererErrors.AccentLibraryName}: Could not subscribe to '${params[0]}'. Key was not found.`;
+  EXECUTION_ERROR: (...params) => {
+    return `${_AccentRendererErrors.AccentLibraryName}: An error ocurred while resolving expression: \`${params[0]}\`. Verify syntax and retry.`;
+  },
+  INVALID_CONTEXT: (...params) => {
+    return `${_AccentRendererErrors.AccentLibraryName}: Provided context is invalid. Verify syntax and retry.`;
   },
   BASE_ERROR: (e) => {
     return `${_AccentRendererErrors.AccentLibraryName}: ${e}`;
@@ -620,7 +628,7 @@ const Renderer = {
           return true;
         })
         .catch((e) => {
-          console.warn(e);
+          console.error(e);
           return false;
         });
     },
@@ -706,10 +714,14 @@ const Renderer = {
         argumentNames.push(...Object.keys(forGroup));
         argumentValues.push(...Object.values(forGroup));
       }
-      return Function(...argumentNames, expression).call(
-        context?.scope,
-        ...argumentValues
-      );
+      try {
+        return Function(...argumentNames, expression).call(
+          context?.scope,
+          ...argumentValues
+        );
+      } catch (e) {
+        throw _AccentRendererErrors.EXECUTION_ERROR(expression);
+      }
     },
     _bExpressionRefersToContext(exp, context) {
       // ¯\_(ツ)_/¯

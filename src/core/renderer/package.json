@@ -1,8 +1,8 @@
 {
   "name": "@accent/renderer",
-  "version": "1.0.0",
+  "version": "1.0.5",
   "description": "Accent.js' libarary for data-binding, observables, directives, and more.",
-  "main": "renderer.js",
+  "main": "renderer.min.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

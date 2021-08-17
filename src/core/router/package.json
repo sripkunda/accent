@@ -1,8 +1,8 @@
 {
   "name": "@accent/router",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "Official router for Accent.js",
-  "main": "router.js",
+  "main": "router.min.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

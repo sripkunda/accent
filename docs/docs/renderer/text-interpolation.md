@@ -59,3 +59,21 @@ Here, we separated each variable in the `@subscribe` helper directive with a `,`
 ```
 
 Now, the interpolation will only be re-executed every time the value of `first` changes. A change in the value of `second` will not be reflected in the DOM.
+
+### `ac` Attribute
+
+As an alternative to the `<ac>` tag, the `ac` attribute allows for text interpolation within a specific element. 
+
+For example: 
+
+```html
+<p><ac>1 + 2</ac></p>
+```
+
+This can be rewritten as: 
+
+```html
+<p ac>1 + 2</p>
+```
+
+This shortcut helps with specific scenarios in regards to selectors and may slightly increase the speed of the DOM, especially when interpolation is commonly used throughout an application.

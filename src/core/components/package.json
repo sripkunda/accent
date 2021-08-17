@@ -1,8 +1,8 @@
 {
   "name": "@accent/components",
-  "version": "1.0.0",
+  "version": "1.0.4",
   "description": "Official compartmentalization system for Accent.js",
-  "main": "components.js",
+  "main": "components.min.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

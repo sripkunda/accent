@@ -6,7 +6,7 @@ sidebar_position: 1
 
 ## Getting Started
 
-### What is this?
+### What is the Accent Renderer?
 
 The Accent Renderer provides support for directives, reactive variables, scoped groups, and inline JavaScript logic. The main purpose of the Renderer is to provide a toolkit for organized, clean, and reusable code. It gives you the ability to implement complex JavaScript functionality in your HTML code, along with an extensive API that can be customized to fit your application's needs.
 

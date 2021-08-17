@@ -138,6 +138,7 @@ const _AccentComponentsErrors = {
 Components.compiler.render();
 
 const $component = (...args) => {
+  if (args.length < 1) return AccentComponent;
   new AccentComponent(...args);
 };
 

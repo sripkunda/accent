@@ -22,7 +22,7 @@ yargs(hideBin(process.argv))
     },
     (argv) => {
       const port = argv.port;
-      console.info(`Starting server on port: ${port} ...`);
+      console.info(`Starting server ...`);
       serve(argv.path, port);
     }
   )

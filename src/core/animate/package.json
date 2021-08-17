@@ -1,8 +1,8 @@
 {
   "name": "@accent/animate",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "Official CSS state management library for Accent.js",
-  "main": "animate.js",
+  "main": "animate.min.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

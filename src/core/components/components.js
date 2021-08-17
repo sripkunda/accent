@@ -122,10 +122,6 @@
 
   const _AccentComponentsConfig = {
     EVENT_PREFIX: `components:`,
-    HELPER_ATTRIBUTE_PREFIX:
-      typeof RendererLibrary !== "undefined"
-        ? `@`
-        : Accent.AccentDirective.helperPrefix,
     COMPONENT_TAGNAME: "component",
   };
 
@@ -152,6 +148,7 @@
   Components.compiler.render();
 
   const $component = (...args) => {
+    if (args.length < 1) return AccentComponent;
     new AccentComponent(...args);
   };
 

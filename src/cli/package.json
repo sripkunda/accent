@@ -1,6 +1,6 @@
 {
   "name": "@accent/cli",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "The official CLI for Accent.js",
   "main": "./bin/index.js",
   "scripts": {
