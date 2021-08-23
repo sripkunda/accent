@@ -8,10 +8,9 @@ Let's get started with Accent.js in **less than two minutes.**
 
 ## What is Accent?
 
-Accent.js is a lightweight, easy-to-use, and **fully modular** web development framework built for simplicity. All Accent libraries are standalone and can be
-used by themselves whenever necessary.
+Accent.js is a lightweight, easy-to-use, and **fully modular** web development framework built for simplicity. 
 
-When libraries are used together, they work together to provide a full toolset for building your web application. Accent is your toolbox, and you choose the best tool(s) for the job. Accent currently is made up of **4 independent libraries.**
+Accent is made up of different modules called "libraries". When libraries are used together, they work together to provide a full toolset for building your web application. Accent currently is made up of **4 independent libraries.**
 
 ## Installation
 

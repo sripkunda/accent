@@ -10,7 +10,7 @@ If you wish to only use a certain set of features for your application, you can 
 
 ## List of Libraries
 
-[**Renderer:**](/docs/renderer/intro) Implement reactive, state-based (also called contexts) JavaScript logic in your application. The Renderer library also provides built-in directives (custom HTML attributes) that allow for complex JavaScript logic in your HTML code.
+[**Renderer:**](/docs/renderer/intro) Implement reactive, state-based JavaScript logic in your application. The Renderer library also provides built-in directives (custom HTML attributes) that allow for complex JavaScript logic in your HTML code.
 
 [**Router:**](/docs/router/intro) Add client-side routing to your application to create fast single-page-applications.
 
