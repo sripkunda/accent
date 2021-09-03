@@ -41,7 +41,7 @@ We would integrate this by writing the component as if it is **meant** to be ins
             description: 'Learn more about Accent.js',
         }
     ]
-}"
+  }"
 >
   <ul ac-for="let task in this.tasks">
     <todo-task></todo-task>

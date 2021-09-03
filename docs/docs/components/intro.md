@@ -6,7 +6,7 @@ sidebar_position: 1
 
 ## Getting Started
 
-### What is the Accent Renderer?
+### What are Accent Components?
 
 Accent Components allows for compartmentalization of HTML into components, meaning that a block of reusable code such as:
 

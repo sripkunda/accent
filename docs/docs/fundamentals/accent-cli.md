@@ -37,7 +37,7 @@ Accent does not have any rules for how you structure your application. However, 
 To create a project, use the following command:
 
 ```shell
-ac create <project-name>
+ac create [project-name]
 ```
 
 This will create a new directory with the following file structure:
@@ -79,5 +79,5 @@ ac serve ./path/to/index.html
 To add a custom port for your server, use the following syntax:
 
 ```shell
-ac serve --port=<port-number>
+ac serve --port=[port-number]
 ```
