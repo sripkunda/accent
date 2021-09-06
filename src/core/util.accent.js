@@ -1,5 +1,6 @@
 /**
  * Accent Util: A set of "helper" or "utility" functions for interacting with the HTML DOM and/or manipulating JavaScript Objects.
+  ** DEPRECATED AND NOT INCLUDED IN RELEASE **
  */
 
 "use strict";
