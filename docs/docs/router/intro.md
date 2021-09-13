@@ -43,6 +43,8 @@ npm install @accent/router
 
 ```html
 <body>
-    
+    <router-target>
+        This is my page!
+    </router-target>
 </body>
 ```

@@ -1,4 +1,4 @@
-# Minify built versions of Accent.js
+# Publish Accent.js packages
 
 # Navigate
 cd src
