@@ -27,3 +27,18 @@ Why is this important? Well, let's take a look at the example below.
 If we want to go to GitHub's landing page, we can get there using two URLs:  <code>https://github.com/home</code> and <code>https://github.com/</code>. However, <code>https://github.com/</code> is still a parent route for a link to a user profile, <code>https://github.com/sripkunda</code>. Whenever the username is not provided, we automatically go to <code>https://github.com/</code>. 
 
 Let's implement this in Accent: 
+
+In our router initialization, let's give an additional route for the `home` route and use a dynamic route on the `user` route: 
+
+```js
+Accent.$router({
+    home: {
+        path: ["/", "/home"]
+        src: "home.html"
+    },
+    user: {
+        path: "/:username", 
+        src: "user.html"
+    }
+});
+```
