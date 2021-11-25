@@ -1,6 +1,6 @@
 {
   "name": "@accent/router",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Official router for Accent.js",
   "main": "router.min.js",
   "scripts": {

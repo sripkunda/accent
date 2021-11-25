@@ -11,10 +11,10 @@ sidebar_position: 1
 Accent Components allows for compartmentalization of HTML into components, meaning that a block of reusable code such as:
 
 ```html
-<p>Reuse me</p>
+<p>Reuse me, I am an element that appears many times on your page!</p>
 ```
 
-Can be simplified to:
+Can be rewritten as to:
 
 ```html
 <reuse-me></reuse-me>
@@ -24,7 +24,7 @@ The library also integrates well with the Accent Renderer, making it the optimal
 
 ## Installation
 
-Install the renderer library with NPM or by CDN:
+Install the components library with NPM or by CDN:
 
 ```shell
 npm install @accent/components

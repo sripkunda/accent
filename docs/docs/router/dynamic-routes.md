@@ -10,13 +10,22 @@ Let's take the URL: <code>https://github.com/<b>sripkunda</b></code>. In this ca
 
 ## Syntax
 
-## Multiple Dynamic Parameters
+Paths with dynamic routes follow the `/normal/:dynamic` syntax, where in the aforementioned example, `dynamic` is the name of the dynamic parameter. 
+
+Multiple dynamic parameters can be created as well: `/:one/:two/`. **Note that there must be a trailing slash for accent to recognize a route as dynamic.**.
 
 ## Protected Routes
 
-Protected routes allow you to fallback to a different route in the case that a certain routing parameter is not provided. 
+Protected routes allow you to fallback to a different route in the case that a certain routing parameter is not provided. On any `<router-target></router-target>` element, use the following syntax: 
 
-## A Quick Look Behind the Scenes
+```html
+<router-target router-protect="[valid javascript boolean logic]" 
+               router-fallback="[route to go to in the case that the protection fails]">
+...
+</router-target>
+```
+
+## Putting It All Together
 
 Knowing how Accent's routing works behind the scenes helps you better use and understand dynamic routes in Accent. 
 
@@ -42,3 +51,13 @@ Accent.$router({
     }
 });
 ```
+
+Now, in our `user.html` file, we can specify (assume that `App` is the global routing object returned by `Accent.$router`): 
+
+```html
+<router-target router-protect="App.params.username" router-fallback="home">
+...
+</router-target>
+```
+
+Now, we get the aforementioned functionality described in the github example.

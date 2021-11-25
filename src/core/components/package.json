@@ -1,6 +1,6 @@
 {
   "name": "@accent/components",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Official compartmentalization system for Accent.js",
   "main": "components.min.js",
   "scripts": {

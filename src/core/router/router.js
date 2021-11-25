@@ -192,7 +192,7 @@
           (typeof RendererLibrary !== "undefined" &&
             Accent.Renderer.compiler._executeInContext(
               `return ${prot}`,
-              AccentContext.find(targetPane),
+              Accent.AccentContext.find(targetPane),
               ["$params"],
               [this.params]
             )) ||

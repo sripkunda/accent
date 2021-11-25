@@ -1,6 +1,6 @@
 {
   "name": "@accent/animate",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Official CSS state management library for Accent.js",
   "main": "animate.min.js",
   "scripts": {
