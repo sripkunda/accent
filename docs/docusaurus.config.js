@@ -6,13 +6,13 @@ module.exports = {
   title: "Accent.js",
   tagline:
     "A fully modular, functional, and easy to use framework - all in less than 10kb",
-  url: "https://accent.js.org",
+  url: "https://sripkunda.github.io/",
   baseUrl: "/",
   onBrokenLinks: "warn",
   onBrokenMarkdownLinks: "warn",
   favicon: "img/favicon.ico",
   organizationName: "sripkunda", // Usually your GitHub org/user name.
-  projectName: "accent.js", // Usually your repo name.
+  projectName: "accent", // Usually your repo name.
   themeConfig: {
     navbar: {
       title: "Accent.js",

@@ -23,7 +23,7 @@ function HomepageHeader() {
         </div>
         <div className="{styles.buttons}">
           <iframe
-            src="https://ghbtns.com/github-btn.html?user=sripkunda&repo=accent.js&type=star&count=true&size=large"
+            src="https://ghbtns.com/github-btn.html?user=sripkunda&repo=accent&type=star&count=true&size=large"
             frameborder="0"
             scrolling="0"
             width="170"
