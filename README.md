@@ -64,7 +64,7 @@ Many of Accent's features utilize the functionality defined in these frameworks 
 
 # Links
 
-- [Documentation](https://accent.js.org/)
+- [Documentation](https://accent.js.org/docs/intro)
 - [Website](https://accent.js.org)
 - [Issue Tracker](https://github.com/sripkunda/accent/issues)
 - [Source Code](https://github.com/sripkunda/accent)
