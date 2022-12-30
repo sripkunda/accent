@@ -20,7 +20,7 @@ npm install @accent/[library-name]
 <script src="https://unpkg.com/@accent/[library-name]"></script>
 ```
 
-Here's an example page of a contact list using the [Accent Renderer](https://accent.js.org/docs/renderer/intro) ibrary:
+Here's an example page of a contact list using the [Accent Renderer](https://accent.js.org/docs/renderer/intro) library:
 
 ```html
 <input type="text" ac-model="name" placeholder="Name" />
