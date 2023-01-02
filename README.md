@@ -6,7 +6,7 @@ A modern, modular, and lightweight JavaScript library built for speed. All in le
 
 # Getting Started
 
-**Looking for documentation? Look [here](https://accent.js.org/docs).**
+**Looking for documentation? Look [here](https://accent.js.org/docs/intro).**
 
 Accent is broken up into different standalone modules. Once combined, these modules work together as a single, full-fledged library.
 
